@@ -1,0 +1,5 @@
+# Rust
+target/
+
+# Svelte
+node_modules/
