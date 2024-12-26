@@ -1,5 +1,5 @@
 <script lang="ts">
-	import onMount from 'svelte';
+	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import type { FolderNode } from '$lib/types';
 
@@ -116,8 +116,8 @@
 		content: '';
 		position: absolute;
 		left: -0.5em;
-		top: -1.3em;
-		bottom: 0.8em;
+		top: -1.2em;
+		bottom: 0.7em;
 		width: 1px;
 		background: #ccc;
 	}
@@ -131,7 +131,7 @@
 		content: '';
 		position: absolute;
 		left: -2em;
-		top: 0.7em;
+		top: 0.8em;
 		width: 1.5em;
 		height: 1px;
 		background: #ccc;
