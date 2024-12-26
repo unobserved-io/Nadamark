@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
+	import { dndzone } from 'svelte-dnd-action';
 	import type { FolderNode } from '$lib/types';
 
 	export let folder: FolderNode;
@@ -44,9 +45,9 @@
 </script>
 
 <div class="tree-item">
-	<details on:toggle={handleToggle}>
+	<details ontoggle={handleToggle}>
 		<summary
-			on:contextmenu={(event) => handleContextMenu(event, 'folder', folder)}
+			oncontextmenu={(event) => handleContextMenu(event, 'folder', folder)}
 			class="folder-summary"
 			><Icon
 				icon={isOpen
@@ -66,7 +67,7 @@
 				<li class="bookmark-item">
 					<a
 						href={bookmark.url}
-						on:contextmenu={(event) => handleContextMenu(event, 'bookmark', bookmark)}
+						oncontextmenu={(event) => handleContextMenu(event, 'bookmark', bookmark)}
 					>
 						{bookmark.name}
 					</a>
@@ -82,14 +83,14 @@
 			<ul>
 				{#if menuType === 'folder'}
 					<li>
-						<button on:click={() => console.log('New folder inside', menuData)}>New Folder</button>
+						<button onclick={() => console.log('New folder inside', menuData)}>New Folder</button>
 					</li>
-					<li><button on:click={() => console.log('Rename folder', menuData)}>Rename</button></li>
-					<li><button on:click={() => console.log('Delete folder', menuData)}>Delete</button></li>
+					<li><button onclick={() => console.log('Rename folder', menuData)}>Rename</button></li>
+					<li><button onclick={() => console.log('Delete folder', menuData)}>Delete</button></li>
 				{:else if menuType === 'bookmark'}
-					<li><button on:click={() => console.log('Open bookmark', menuData)}>Open</button></li>
-					<li><button on:click={() => console.log('Rename bookmark', menuData)}>Rename</button></li>
-					<li><button on:click={() => console.log('Delete bookmark', menuData)}>Delete</button></li>
+					<li><button onclick={() => console.log('Open bookmark', menuData)}>Open</button></li>
+					<li><button onclick={() => console.log('Rename bookmark', menuData)}>Rename</button></li>
+					<li><button onclick={() => console.log('Delete bookmark', menuData)}>Delete</button></li>
 				{/if}
 			</ul>
 		</div>
