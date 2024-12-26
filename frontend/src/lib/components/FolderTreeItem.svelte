@@ -32,11 +32,10 @@
 
 	summary {
 		cursor: pointer;
-		font-weight: bold;
 	}
 
 	a {
-		text-decoration: none;
-		color: #0066cc;
+		text-decoration: underline;
+		color: #0000ee;
 	}
 </style>

@@ -9,7 +9,6 @@
 	export let data: PageData;
 </script>
 
-<h1>Bookmarks</h1>
 <div class="tree-view">
 	<ul>
 		{#each data.folderTree as folder}
@@ -22,7 +21,6 @@
 
 <style>
 	.tree-view ul {
-		list-style: none;
 		padding-left: 1em;
 	}
 </style>
