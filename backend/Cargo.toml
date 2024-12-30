@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.7"
+diesel = { version = "2.2", features = ["sqlite", "time"] }
+diesel_migrations = "2.2"
+directories = "5.0"
 serde = { version = "1", features = ["derive"] }
-# serde_derive = "1"
 serde_json = "1.0"
 time = { version = "0.3", features = ["serde"] }
 tokio = { version = "1", features = ["rt-multi-thread"] }
 tower-http = { version = "0.6", features = ["cors"] }
+axum = "0.7"

@@ -1,65 +1,29 @@
+mod database;
+mod drag_drop;
 mod models;
+mod schema;
+mod tree;
 
 use axum::{
+    http,
     routing::{get, post},
-    Json, Router,
+    Router,
 };
-use models::{Bookmark, Folder, FolderNode};
-use serde_json::json;
-use std::net::SocketAddr;
-use time;
+use drag_drop::handle_move;
 use tower_http::cors::{Any, CorsLayer};
-
-async fn get_folders() -> Vec<Folder> {
-    vec![
-        Folder {
-            id: 1,
-            name: "Favorites".to_string(),
-            parent_id: None,
-        },
-        Folder {
-            id: 2,
-            name: "Work".to_string(),
-            parent_id: Some(1),
-        },
-    ]
-}
-
-async fn get_bookmarks() -> Vec<Bookmark> {
-    vec![
-        Bookmark {
-            id: 1,
-            name: "Rust Documentation".to_string(),
-            url: "https://www.rust-lang.org".to_string(),
-            favicon: "".to_string(),
-            created: time::OffsetDateTime::now_utc(),
-            folder_id: 1,
-        },
-        Bookmark {
-            id: 2,
-            name: "SvelteKit Docs".to_string(),
-            url: "https://kit.svelte.dev".to_string(),
-            favicon: "".to_string(),
-            created: time::OffsetDateTime::now_utc(),
-            folder_id: 2,
-        },
-    ]
-}
-
-async fn get_folder_tree() -> Json<Vec<FolderNode>> {
-    let folders = get_folders().await;
-    let bookmarks = get_bookmarks().await;
-
-    let tree = Folder::to_tree(&folders, &bookmarks);
-
-    Json(tree)
-}
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    database::initialize_database();
+
     let router = Router::new()
-        .route("/api/folder-tree", get(get_folder_tree))
-        .layer(CorsLayer::new().allow_origin(Any));
+        .route("/api/folder-tree", get(tree::refresh_tree))
+        .route("/api/move", post(handle_move))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_headers([http::header::CONTENT_TYPE]),
+        );
 
     let server = "0.0.0.0:3096";
     let listener = tokio::net::TcpListener::bind(&server).await?;

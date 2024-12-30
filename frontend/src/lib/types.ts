@@ -14,3 +14,8 @@ export interface FolderNode {
 	children: FolderNode[];
 	bookmarks: Bookmark[];
 }
+
+export interface RootItems {
+	root_folders: FolderNode[];
+	root_bookmarks: Bookmark[];
+}

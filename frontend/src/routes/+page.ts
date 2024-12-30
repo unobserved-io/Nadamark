@@ -1,7 +1,7 @@
-import type { FolderNode } from '$lib/types';
+import type { RootItems } from '$lib/types';
 
 export const load = async () => {
-	const treeRes = await fetch('http://localhost:3096/api/folder-tree');
-	const folderTree: FolderNode[] = await treeRes.json();
+	const treeResult = await fetch('http://localhost:3096/api/folder-tree');
+	const folderTree: RootItems = await treeResult.json();
 	return { folderTree };
 };
