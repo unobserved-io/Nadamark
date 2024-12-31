@@ -108,3 +108,19 @@ pub fn is_subfolder(folder_id: i32, potential_parent_id: i32) -> bool {
 
     false
 }
+
+pub fn get_highest_bookmark_id() -> Result<i32, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    bookmarks.select(id).order(id.desc()).first(connection)
+}
+
+pub fn get_highest_folder_id() -> Result<i32, Error> {
+    use crate::schema::folders::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    folders.select(id).order(id.desc()).first(connection)
+}

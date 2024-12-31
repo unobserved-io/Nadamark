@@ -19,7 +19,7 @@ pub struct Bookmark {
     pub id: i32,
     pub name: String,
     pub url: String,
-    pub favicon_url: String,
+    pub favicon_url: Option<String>,
     pub created: time::OffsetDateTime,
     pub folder_id: Option<i32>,
 }

@@ -11,7 +11,7 @@ diesel::table! {
         id -> Integer,
         name -> Text,
         url -> Text,
-        favicon_url -> Text,
+        favicon_url -> Nullable<Text>,
         created -> TimestamptzSqlite,
         folder_id -> Nullable<Integer>,
     }
