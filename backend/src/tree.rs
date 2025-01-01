@@ -70,9 +70,11 @@ pub async fn refresh_tree() -> impl IntoResponse {
         }
     }
 
-    Json(RootItems {
+    let mut root_items = RootItems {
         root_folders,
         root_bookmarks,
-    })
-    .into_response()
+    };
+    root_items.sort_by_name();
+
+    Json(root_items).into_response()
 }

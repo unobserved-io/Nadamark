@@ -30,12 +30,48 @@ pub struct RootItems {
     pub root_bookmarks: Vec<Bookmark>,
 }
 
+impl RootItems {
+    pub fn sort_by_name(&mut self) {
+        self.root_folders.sort_by(|a, b| {
+            a.folder
+                .name
+                .to_lowercase()
+                .cmp(&b.folder.name.to_lowercase())
+        });
+
+        self.root_bookmarks
+            .sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
+        for folder in &mut self.root_folders {
+            folder.sort_by_name();
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FolderNode {
     #[serde(flatten)]
     pub folder: Folder,
     pub children: Vec<FolderNode>,
     pub bookmarks: Vec<Bookmark>,
+}
+
+impl FolderNode {
+    pub fn sort_by_name(&mut self) {
+        self.children.sort_by(|a, b| {
+            a.folder
+                .name
+                .to_lowercase()
+                .cmp(&b.folder.name.to_lowercase())
+        });
+
+        self.bookmarks
+            .sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+
+        for child in &mut self.children {
+            child.sort_by_name();
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, PartialEq)]

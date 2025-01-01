@@ -5,11 +5,7 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	interface PageData {
-		folderTree: RootItems;
-	}
-
-	export let data: PageData;
+	let data: { folderTree: RootItems } = { folderTree: { root_folders: [], root_bookmarks: [] } };
 
 	async function refreshTree() {
 		const treeResult = await fetch('http://localhost:3096/api/folder-tree');
@@ -31,6 +27,7 @@
 	}
 
 	onMount(() => {
+		refreshTree();
 		document.addEventListener('click', handleClickOutside);
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
