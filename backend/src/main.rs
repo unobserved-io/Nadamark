@@ -10,7 +10,6 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use drag_drop::handle_move;
 use tower_http::cors::{Any, CorsLayer};
 
 #[tokio::main]
@@ -19,7 +18,8 @@ async fn main() -> std::io::Result<()> {
 
     let router = Router::new()
         .route("/api/folder-tree", get(tree::refresh_tree))
-        .route("/api/move", post(handle_move))
+        .route("/api/move", post(drag_drop::handle_move))
+        .route("/api/import-bookmarks", post(import::import_bookmarks))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)

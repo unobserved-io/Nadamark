@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::folders)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -11,7 +11,7 @@ pub struct Folder {
     pub parent_id: Option<i32>,
 }
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::bookmarks)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 #[derive(Debug, Serialize, Deserialize, Clone)]

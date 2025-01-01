@@ -51,6 +51,26 @@ pub fn initialize_database() {
         .expect("Failed to initialize database");
 }
 
+pub fn insert_folders(folders: Vec<Folder>) -> Result<usize, Error> {
+    use crate::schema::folders;
+
+    let connection = &mut establish_connection();
+
+    diesel::insert_into(folders::table)
+        .values(&folders)
+        .execute(connection)
+}
+
+pub fn insert_bookmarks(bookmarks: Vec<Bookmark>) -> Result<usize, Error> {
+    use crate::schema::bookmarks;
+
+    let connection = &mut establish_connection();
+
+    diesel::insert_into(bookmarks::table)
+        .values(&bookmarks)
+        .execute(connection)
+}
+
 pub fn get_all_folders() -> Result<Vec<Folder>, Error> {
     use crate::schema::folders::dsl::*;
 

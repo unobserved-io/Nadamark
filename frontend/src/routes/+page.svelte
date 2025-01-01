@@ -2,6 +2,8 @@
 	import TreeItem from '$lib/components/TreeItem.svelte';
 	import Icon from '@iconify/svelte';
 	import type { RootItems } from '$lib/types';
+	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 
 	interface PageData {
 		folderTree: RootItems;
@@ -13,12 +15,111 @@
 		const treeResult = await fetch('http://localhost:3096/api/folder-tree');
 		data.folderTree = await treeResult.json();
 	}
+
+	// Drop-down hamburger menu
+	let hamburgerMenuIsOpen = false;
+	let dropDownRef: HTMLDivElement;
+
+	function handleClickOutside(event: MouseEvent) {
+		if (dropDownRef && !dropDownRef.contains(event.target as Node)) {
+			hamburgerMenuIsOpen = false;
+		}
+	}
+
+	function toggleDropDown() {
+		hamburgerMenuIsOpen = !hamburgerMenuIsOpen;
+	}
+
+	onMount(() => {
+		document.addEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	});
+
+	// Import Bookmarks
+	let fileInput: HTMLInputElement;
+	let status: string = '';
+	let isLoading: boolean = false;
+
+	async function handleFileSelect(event: Event): Promise<void> {
+		const target = event.target as HTMLInputElement;
+		const file = target.files?.[0];
+
+		if (!file || !file.name.endsWith('.html')) {
+			status = 'Please select a valid HTML bookmarks file';
+			return;
+		}
+
+		isLoading = true;
+		status = 'Reading file...';
+
+		try {
+			const fileContent = await file.text();
+
+			const response = await fetch('http://localhost:3096/api/import-bookmarks', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'text/html'
+				},
+				body: fileContent
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			} else {
+				refreshTree();
+				// TODO: Have this be a pop-up at the bottom of the page to show success or failure
+				status = `Successfully imported bookmarks`;
+			}
+		} catch (error) {
+			console.error('Error importing bookmarks:', error);
+			status = `Error importing bookmarks: ${error instanceof Error ? error.message : 'Unknown error'}`;
+		} finally {
+			isLoading = false;
+			// Reset file input
+			fileInput.value = '';
+		}
+	}
+
+	// Type-safe event handler
+	function handleInputChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+		handleFileSelect(event);
+	}
 </script>
 
 <div class="top-nav">
 	<div class="nav-item"><Icon icon={'material-symbols-light:bookmark-add-sharp'} /></div>
 	<div class="nav-item"><Icon icon={'material-symbols-light:create-new-folder-sharp'} /></div>
-	<div class="nav-item"><Icon icon={'pepicons-pencil:hamburger'} /></div>
+	<div class="nav-dropdown" bind:this={dropDownRef}>
+		<button
+			type="button"
+			class="nav-item"
+			on:click={toggleDropDown}
+			aria-expanded={hamburgerMenuIsOpen}
+			aria-label="Menu"
+		>
+			<Icon icon={'pepicons-pencil:hamburger'} />
+		</button>
+
+		{#if hamburgerMenuIsOpen}
+			<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
+				<label for="bookmarkHTMLUpload" class="dropdown-item">
+					<Icon icon="material-symbols:upload" />
+					Import
+				</label>
+				<input
+					id="bookmarkHTMLUpload"
+					bind:this={fileInput}
+					type="file"
+					accept=".html"
+					on:change={handleInputChange}
+					disabled={isLoading}
+					style="display:none"
+				/>
+			</div>
+		{/if}
+	</div>
 </div>
 <div class="tree-view">
 	<ul>
@@ -43,10 +144,46 @@
 	}
 
 	.nav-item {
-		margin-left: 20px; /* Add spacing between items */
+		margin-left: 20px;
+		background: none;
+		border: none;
+		padding: 0;
+		display: flex;
+		align-items: center;
 	}
 
 	.tree-view ul {
 		padding-left: 1em;
+	}
+
+	.nav-dropdown {
+		position: relative;
+	}
+
+	.dropdown-menu {
+		position: absolute;
+		top: 100%;
+		right: 0;
+		background: white;
+		border: 1px solid #eee;
+		border-radius: 4px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		min-width: 180px;
+		z-index: 1000;
+		font-size: 0.5em; /* Scale down the dropdown text relative to the nav */
+	}
+
+	.dropdown-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		color: #333;
+		text-decoration: none;
+		transition: background-color 0.2s;
+	}
+
+	.dropdown-item:hover {
+		background-color: #f5f5f5;
 	}
 </style>
