@@ -1,5 +1,6 @@
 mod database;
 mod drag_drop;
+mod export;
 mod import;
 mod models;
 mod schema;
@@ -20,6 +21,7 @@ async fn main() -> std::io::Result<()> {
         .route("/api/folder-tree", get(tree::refresh_tree))
         .route("/api/move", post(drag_drop::handle_move))
         .route("/api/import-bookmarks", post(import::import_bookmarks))
+        .route("/api/export", get(export::export_bookmarks))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)

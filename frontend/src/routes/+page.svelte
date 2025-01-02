@@ -79,9 +79,31 @@
 		}
 	}
 
-	// Type-safe event handler
 	function handleInputChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
 		handleFileSelect(event);
+	}
+
+	// Export bookmarks
+	async function exportBookmarksAsHtml() {
+		const response = await fetch('http://localhost:3096/api/export');
+		const bookmarksHtml = await response.text();
+		if (bookmarksHtml.trim().length > 0) {
+			downloadHtml(bookmarksHtml);
+		} // TODO: Otherwise show a pop-up at bottom "No bookmarks to export"
+	}
+
+	function downloadHtml(htmlString: string): void {
+		const blob = new Blob([htmlString], { type: 'text/html' });
+		const url = URL.createObjectURL(blob);
+
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'nadamark-export.html';
+		document.body.appendChild(link);
+		link.click();
+
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
 	}
 </script>
 
@@ -92,7 +114,7 @@
 		<button
 			type="button"
 			class="nav-item"
-			on:click={toggleDropDown}
+			onclick={toggleDropDown}
 			aria-expanded={hamburgerMenuIsOpen}
 			aria-label="Menu"
 		>
@@ -110,10 +132,14 @@
 					bind:this={fileInput}
 					type="file"
 					accept=".html"
-					on:change={handleInputChange}
+					onchange={handleInputChange}
 					disabled={isLoading}
 					style="display:none"
 				/>
+				<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
+					<Icon icon="material-symbols:download" />
+					Export
+				</button>
 			</div>
 		{/if}
 	</div>
@@ -171,6 +197,7 @@
 	}
 
 	.dropdown-item {
+		width: 100%;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -178,6 +205,7 @@
 		color: #333;
 		text-decoration: none;
 		transition: background-color 0.2s;
+		cursor: pointer;
 	}
 
 	.dropdown-item:hover {

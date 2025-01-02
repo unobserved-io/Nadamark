@@ -144,3 +144,31 @@ pub fn get_highest_folder_id() -> Result<i32, Error> {
 
     folders.select(id).order(id.desc()).first(connection)
 }
+
+pub fn get_all_child_folders(parent_folder_id: &Option<i32>) -> Result<Vec<Folder>, Error> {
+    use crate::schema::folders::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    if parent_folder_id.is_some() {
+        folders
+            .filter(parent_id.eq(parent_folder_id))
+            .load(connection)
+    } else {
+        folders.filter(parent_id.is_null()).load(connection)
+    }
+}
+
+pub fn get_all_child_bookmarks(parent_folder_id: &Option<i32>) -> Result<Vec<Bookmark>, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    if parent_folder_id.is_some() {
+        bookmarks
+            .filter(folder_id.eq(parent_folder_id))
+            .load(connection)
+    } else {
+        bookmarks.filter(folder_id.is_null()).load(connection)
+    }
+}

@@ -2,6 +2,7 @@ diesel::table! {
     folders (id) {
         id -> Integer,
         name -> Text,
+        created -> TimestamptzSqlite,
         parent_id -> Nullable<Integer>,
     }
 }

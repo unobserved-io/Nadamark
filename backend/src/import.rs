@@ -50,9 +50,18 @@ fn parse_bookmarks_html(html: &str) -> Result<(Vec<Folder>, Vec<Bookmark>), Stri
             None => None,
         };
 
+        let created = folder_element
+            .value()
+            .attr("add_date")
+            .and_then(|timestamp| timestamp.parse::<i64>().ok())
+            .map(|unix_timestamp| time::OffsetDateTime::from_unix_timestamp(unix_timestamp).ok())
+            .flatten()
+            .unwrap_or(OffsetDateTime::now_local().unwrap_or(OffsetDateTime::now_utc()));
+
         folders_to_import.push(Folder {
             id: folder_id_counter,
             name: folder_name,
+            created,
             parent_id: parent_folder_id,
         });
 

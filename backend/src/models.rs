@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct Folder {
     pub id: i32,
     pub name: String,
+    pub created: time::OffsetDateTime,
     pub parent_id: Option<i32>,
 }
 
