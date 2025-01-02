@@ -35,6 +35,13 @@
 		}
 	});
 
+	function preventDefault(fn: (event: MouseEvent) => void) {
+		return function (this: HTMLAnchorElement, event: MouseEvent) {
+			event.preventDefault();
+			fn.call(this, event);
+		};
+	}
+
 	async function handleSearch() {
 		if (!searchTerm) {
 			results = [];
@@ -56,6 +63,7 @@
 		if (selectedIndex >= 0) {
 			select(results[selectedIndex]);
 			selectedIndex = -1;
+			handleClose();
 		}
 	}
 
@@ -104,16 +112,17 @@
 					<ul class="max-h-96 overflow-y-auto border-t">
 						{#each results as result, i}
 							<li>
-								<button
-									class="w-full cursor-pointer p-4 text-left"
+								<a
+									href={result.url}
+									class="block w-full cursor-pointer p-4 text-left"
 									class:bg-gray-100={i === selectedIndex}
 									class:rounded-b-xl={i === results.length - 1}
-									onclick={() => selectItem()}
+									onclick={preventDefault(() => selectItem())}
 									onfocus={() => ({})}
 									onmouseover={() => (selectedIndex = i)}
 								>
 									<h3 class="font-medium">{result.name}</h3>
-								</button>
+								</a>
 							</li>
 						{/each}
 					</ul>
