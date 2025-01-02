@@ -12,6 +12,17 @@
 		data.folderTree = await treeResult.json();
 	}
 
+	function handleKeyDown(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'f':
+				showSearch = true;
+				break;
+			case 'Escape':
+				showSearch = false;
+				break;
+		}
+	}
+
 	// Drop-down hamburger menu
 	let hamburgerMenuIsOpen = false;
 	let dropDownRef: HTMLDivElement;
@@ -105,7 +116,13 @@
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
 	}
+
+	// Search
+	import SearchOverlay from '$lib/components/SearchOverlay.svelte';
+	let showSearch = false;
 </script>
+
+<svelte:window onkeydown={handleKeyDown} />
 
 <div class="top-nav">
 	<div class="nav-item"><Icon icon={'material-symbols-light:bookmark-add-sharp'} /></div>
@@ -154,6 +171,20 @@
 		{/each}
 	</ul>
 </div>
+
+<SearchOverlay
+	isOpen={showSearch}
+	folderTree={data.folderTree}
+	close={() => (showSearch = false)}
+	select={(bookmark) => {
+		showSearch = false;
+		const a = document.createElement('a');
+		a.href = bookmark.url;
+		a.target = '_blank';
+		a.rel = 'noreferrer';
+		a.click();
+	}}
+/>
 
 <style>
 	.top-nav {
