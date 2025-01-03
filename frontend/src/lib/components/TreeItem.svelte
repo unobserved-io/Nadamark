@@ -92,7 +92,7 @@
 		data: FolderNode | Bookmark
 	) {
 		event.preventDefault();
-		pos = { x: event.clientX, y: event.clientY };
+		pos = { x: event.pageX, y: event.pageY };
 		menuType = type;
 		menuData = data;
 		showMenu = true;
@@ -167,7 +167,7 @@
 {/if}
 
 {#if showMenu}
-	<nav style="position: absolute; top: {pos.y}px; left: {pos.x}px" class="context-menu">
+	<nav style="position: fixed; top: {pos.y}px; left: {pos.x}px" class="context-menu">
 		<div>
 			<ul>
 				{#if menuType === 'folder'}
