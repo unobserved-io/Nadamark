@@ -105,9 +105,19 @@
 	}
 
 	onMount(() => {
-		document.addEventListener('click', closeContextMenu);
+		// Close context menu if user clicks outside of menu
+		const handleClick = (event: MouseEvent) => {
+			if (showMenu && event.target instanceof Node) {
+				const contextMenu = document.querySelector('.context-menu');
+				if (contextMenu && !contextMenu.contains(event.target)) {
+					closeContextMenu();
+				}
+			}
+		};
+
+		document.addEventListener('click', handleClick);
 		return () => {
-			document.removeEventListener('click', closeContextMenu);
+			document.removeEventListener('click', handleClick);
 		};
 	});
 </script>
