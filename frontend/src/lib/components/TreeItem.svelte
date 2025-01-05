@@ -2,6 +2,11 @@
 	import { onMount, createEventDispatcher } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import type { Bookmark, FolderNode } from '$lib/types';
+	import {
+		contextMenuStore,
+		openContextMenu,
+		closeContextMenu
+	} from '$lib/stores/contextMenuStore';
 
 	export let item: FolderNode | Bookmark;
 	export let type: 'folder' | 'bookmark';
@@ -81,33 +86,19 @@
 	}
 
 	// Context menu
-	let showMenu = false;
-	let menuType: 'folder' | 'bookmark' | null = null;
-	let menuData: FolderNode | Bookmark | null = null;
-	let pos = { x: 0, y: 0 };
-
 	function handleContextMenu(
 		event: MouseEvent,
 		type: 'folder' | 'bookmark',
 		data: FolderNode | Bookmark
 	) {
 		event.preventDefault();
-		pos = { x: event.pageX, y: event.pageY };
-		menuType = type;
-		menuData = data;
-		showMenu = true;
-	}
-
-	function closeContextMenu() {
-		showMenu = false;
-		menuType = null;
-		menuData = null;
+		openContextMenu(type, data, { x: event.pageX, y: event.pageY });
 	}
 
 	onMount(() => {
 		// Close context menu if user clicks outside of menu
 		const handleClick = (event: MouseEvent) => {
-			if (showMenu && event.target instanceof Node) {
+			if ($contextMenuStore.isOpen && event.target instanceof Node) {
 				const contextMenu = document.querySelector('.context-menu');
 				if (contextMenu && !contextMenu.contains(event.target)) {
 					closeContextMenu();
@@ -176,20 +167,46 @@
 	</li>
 {/if}
 
-{#if showMenu}
-	<nav style="position: fixed; top: {pos.y}px; left: {pos.x}px" class="context-menu">
+{#if $contextMenuStore.isOpen}
+	<nav
+		style="position: fixed; top: {$contextMenuStore.position.y}px; left: {$contextMenuStore.position
+			.x}px"
+		class="context-menu"
+	>
 		<div>
 			<ul>
-				{#if menuType === 'folder'}
+				{#if $contextMenuStore.type === 'folder'}
 					<li>
-						<button onclick={() => console.log('New folder inside', menuData)}>New Folder</button>
+						<button onclick={() => console.log('New folder inside', $contextMenuStore.data)}
+							>New Folder</button
+						>
 					</li>
-					<li><button onclick={() => console.log('Rename folder', menuData)}>Rename</button></li>
-					<li><button onclick={() => console.log('Delete folder', menuData)}>Delete</button></li>
-				{:else if menuType === 'bookmark'}
-					<li><button onclick={() => console.log('Open bookmark', menuData)}>Open</button></li>
-					<li><button onclick={() => console.log('Rename bookmark', menuData)}>Rename</button></li>
-					<li><button onclick={() => console.log('Delete bookmark', menuData)}>Delete</button></li>
+					<li>
+						<button onclick={() => console.log('Rename folder', $contextMenuStore.data)}
+							>Rename</button
+						>
+					</li>
+					<li>
+						<button onclick={() => console.log('Delete folder', $contextMenuStore.data)}
+							>Delete</button
+						>
+					</li>
+				{:else if $contextMenuStore.type === 'bookmark'}
+					<li>
+						<button onclick={() => console.log('Open bookmark', $contextMenuStore.data)}
+							>Open</button
+						>
+					</li>
+					<li>
+						<button onclick={() => console.log('Rename bookmark', $contextMenuStore.data)}
+							>Rename</button
+						>
+					</li>
+					<li>
+						<button onclick={() => console.log('Delete bookmark', $contextMenuStore.data)}
+							>Delete</button
+						>
+					</li>
 				{/if}
 			</ul>
 		</div>
@@ -222,12 +239,14 @@
 		background: #ccc;
 	}
 
-	li {
+	li.folder-item,
+	li.bookmark-item {
 		margin: 0.5em 0;
 		position: relative;
 	}
 
-	li::before {
+	li.folder-item::before,
+	li.bookmark-item::before {
 		content: '';
 		position: absolute;
 		left: -2em;
@@ -237,7 +256,8 @@
 		background: #ccc;
 	}
 
-	li:last-child::after {
+	li.folder-item:last-child::after,
+	li.bookmark-item:last-child::after {
 		content: '';
 		position: absolute;
 		left: 0;
