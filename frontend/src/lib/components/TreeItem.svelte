@@ -322,11 +322,15 @@
 	.context-menu ul {
 		list-style: none;
 		margin: 0;
-		padding: 0.5em;
+		padding: 0em;
 	}
+
 	.context-menu li {
-		margin: 0.3em 0;
+		width: 100%;
+		display: flex;
+		transition: background-color 0.2s;
 	}
+
 	.context-menu button {
 		background: none;
 		border: none;
@@ -334,6 +338,10 @@
 		padding: 0.5em;
 		width: 100%;
 		text-align: left;
+	}
+
+	.context-menu li:hover {
+		background-color: #f5f5f5;
 	}
 
 	:global(.drag-over) {
