@@ -178,12 +178,22 @@
 				{#if $contextMenuStore.type === 'folder'}
 					<li>
 						<button onclick={() => console.log('New folder inside', $contextMenuStore.data)}
-							>New Folder</button
+							>New folder</button
+						>
+					</li>
+					<li>
+						<button onclick={() => console.log('New bookmark inside', $contextMenuStore.data)}
+							>New bookmark</button
+						>
+					</li>
+					<li>
+						<button onclick={() => console.log('New folder inside', $contextMenuStore.data)}
+							>Favorite</button
 						>
 					</li>
 					<li>
 						<button onclick={() => console.log('Rename folder', $contextMenuStore.data)}
-							>Rename</button
+							>Edit</button
 						>
 					</li>
 					<li>
@@ -194,12 +204,12 @@
 				{:else if $contextMenuStore.type === 'bookmark'}
 					<li>
 						<button onclick={() => console.log('Open bookmark', $contextMenuStore.data)}
-							>Open</button
+							>Favorite</button
 						>
 					</li>
 					<li>
 						<button onclick={() => console.log('Rename bookmark', $contextMenuStore.data)}
-							>Rename</button
+							>Edit</button
 						>
 					</li>
 					<li>
