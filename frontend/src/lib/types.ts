@@ -7,6 +7,12 @@ export interface Bookmark {
 	folder_id: number;
 }
 
+export interface Folder {
+	id: number;
+	name: string;
+	parent_id: number | null;
+}
+
 export interface FolderNode {
 	id: number;
 	name: string;

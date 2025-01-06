@@ -1,5 +1,7 @@
 <script lang="ts">
 	import TreeItem from '$lib/components/TreeItem.svelte';
+	import SearchOverlay from '$lib/components/SearchOverlay.svelte';
+	import NewItemModal from '$lib/components/NewItemModal.svelte';
 	import Icon from '@iconify/svelte';
 	import type { RootItems } from '$lib/types';
 	import { onMount } from 'svelte';
@@ -118,8 +120,14 @@
 	}
 
 	// Search
-	import SearchOverlay from '$lib/components/SearchOverlay.svelte';
 	let showSearch = false;
+
+	// New Item Modal
+	let showNewItemModal = false;
+
+	function openNewItemModal() {
+		showNewItemModal = true;
+	}
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
@@ -164,10 +172,22 @@
 <div class="tree-view">
 	<ul>
 		{#each data.folderTree.root_folders as folder}
-			<li><TreeItem item={folder} type="folder" on:refreshTree={refreshTree} /></li>
+			<li>
+				<TreeItem
+					item={folder}
+					type="folder"
+					{refreshTree}
+					showNewItemModal={() => (showNewItemModal = true)}
+				/>
+			</li>
 		{/each}
 		{#each data.folderTree.root_bookmarks as bookmark}
-			<TreeItem item={bookmark} type="bookmark" on:refreshTree={refreshTree} />
+			<TreeItem
+				item={bookmark}
+				type="bookmark"
+				{refreshTree}
+				showNewItemModal={() => (showNewItemModal = true)}
+			/>
 		{/each}
 	</ul>
 </div>
@@ -185,6 +205,8 @@
 		a.click();
 	}}
 />
+
+<NewItemModal showModal={showNewItemModal} folderTree={data.folderTree} type="folder" />
 
 <style>
 	.top-nav {

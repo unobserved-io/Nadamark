@@ -1,17 +1,20 @@
 <script lang="ts">
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
 	import type { Bookmark, FolderNode } from '$lib/types';
+	import Self from './TreeItem.svelte';
 	import {
 		contextMenuStore,
 		openContextMenu,
 		closeContextMenu
 	} from '$lib/stores/contextMenuStore';
 
-	export let item: FolderNode | Bookmark;
-	export let type: 'folder' | 'bookmark';
-
-	const dispatch = createEventDispatcher();
+	let { item, type, refreshTree, showNewItemModal } = $props<{
+		item: FolderNode | Bookmark;
+		type: 'folder' | 'bookmark';
+		refreshTree: () => void;
+		showNewItemModal: () => void;
+	}>();
 
 	function isFolder(item: FolderNode | Bookmark): item is FolderNode {
 		return 'children' in item;
@@ -22,7 +25,7 @@
 	}
 
 	// Open/closed folders
-	let isOpen = false;
+	let isOpen = $state(false);
 	function handleToggle() {
 		isOpen = !isOpen;
 	}
@@ -79,7 +82,7 @@
 				throw new Error('Failed to move item');
 			}
 
-			dispatch('refreshTree');
+			refreshTree();
 		} catch (err) {
 			console.error('Drop failed:', err);
 		}
@@ -135,7 +138,7 @@
 			<ul class="folder-children">
 				{#each item.children as child}
 					<li class="folder-item">
-						<svelte:self item={child} type="folder" on:refreshTree />
+						<Self item={child} type="folder" {refreshTree} {showNewItemModal} />
 					</li>
 				{/each}
 				{#each item.bookmarks as bookmark}
@@ -177,9 +180,7 @@
 			<ul>
 				{#if $contextMenuStore.type === 'folder'}
 					<li>
-						<button onclick={() => console.log('New folder inside', $contextMenuStore.data)}
-							>New folder</button
-						>
+						<button onclick={showNewItemModal}>New folder</button>
 					</li>
 					<li>
 						<button onclick={() => console.log('New bookmark inside', $contextMenuStore.data)}
