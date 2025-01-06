@@ -155,6 +155,7 @@
 				<input
 					id="bookmarkHTMLUpload"
 					bind:this={fileInput}
+					onclick={toggleDropDown}
 					type="file"
 					accept=".html"
 					onchange={handleInputChange}
