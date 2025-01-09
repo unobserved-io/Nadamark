@@ -30,6 +30,6 @@ export function openContextMenu(
 	});
 }
 
-export function closeContextMenu() {
-	contextMenuStore.set(initialState);
-}
+// export function closeContextMenu() {
+// 	contextMenuStore.set(initialState);
+// }

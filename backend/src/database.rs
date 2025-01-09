@@ -51,6 +51,23 @@ pub fn initialize_database() {
         .expect("Failed to initialize database");
 }
 
+pub fn create_new_folder(name: String, parent_id: Option<i32>) -> Result<usize, Error> {
+    use crate::schema::folders;
+
+    let connection = &mut establish_connection();
+
+    let id = get_highest_folder_id()? + 1;
+
+    diesel::insert_into(folders::table)
+        .values(Folder {
+            id,
+            name,
+            created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
+            parent_id,
+        })
+        .execute(connection)
+}
+
 pub fn insert_folders(folders: Vec<Folder>) -> Result<usize, Error> {
     use crate::schema::folders;
 

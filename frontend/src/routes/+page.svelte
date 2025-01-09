@@ -207,7 +207,12 @@
 	}}
 />
 
-<NewItemModal showModal={showNewItemModal} folderTree={data.folderTree} type="folder" />
+<NewItemModal
+	showModal={showNewItemModal}
+	type="folder"
+	folderTree={data.folderTree}
+	{refreshTree}
+/>
 
 <style>
 	.top-nav {

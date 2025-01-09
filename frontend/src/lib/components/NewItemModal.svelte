@@ -1,22 +1,72 @@
 <script lang="ts">
 	import type { Folder, RootItems } from '$lib/types';
 	import { getAllFolders } from '$lib/utils/allFolders';
-
-	// import type { Bookmark, RootItems } from '$lib/types';
+	import { contextMenuStore } from '$lib/stores/contextMenuStore';
 
 	let {
 		showModal = false,
 		type,
-		folderTree
-	} = $props<{ showModal: boolean; type: string; folderTree: RootItems }>();
+		folderTree,
+		refreshTree
+	} = $props<{
+		showModal: boolean;
+		type: string;
+		folderTree: RootItems;
+		refreshTree: () => void;
+	}>();
 
 	let allFolders: Folder[] = $state([]);
+	let selectedFolder: number | undefined = $state();
+	let itemName = $state('');
 
 	$effect(() => {
 		if (showModal) {
 			allFolders = getAllFolders(folderTree);
+			selectedFolder = $contextMenuStore.data?.id;
 		}
 	});
+
+	async function handleSave() {
+		try {
+			if (type == 'folder') {
+				const response = await fetch('http://localhost:3096/api/create-folder', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						name: itemName,
+						parent_id: selectedFolder
+					})
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to create folder');
+				}
+			} else if (type == 'bookmark') {
+				const response = await fetch('http://localhost:3096/api/create-bookmark', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						name: itemName,
+						parent_id: selectedFolder
+					})
+				});
+
+				if (!response.ok) {
+					throw new Error('Failed to create bookmark');
+				}
+			}
+
+			refreshTree();
+		} catch (err) {
+			console.error('Creation failed:', err);
+		}
+
+		closeModal();
+	}
 
 	function closeModal() {
 		showModal = false;
@@ -32,20 +82,21 @@
 				<form>
 					<div class="form-group">
 						<label for="name">Name</label>
-						<input type="text" name="name" required />
+						<input type="text" name="name" required bind:value={itemName} />
 					</div>
 
 					<div class="form-group">
 						<label for="location">Location</label>
-						<select name="folders" id="location">
+						<select name="folders" id="location" bind:value={selectedFolder}>
+							<option value={undefined}></option>
 							{#each allFolders as folder}
-								<option value={folder.name}>{folder.name}</option>
+								<option value={folder.id}>{folder.name}</option>
 							{/each}
 						</select>
 					</div>
 
 					<center>
-						<button type="submit" class="save" onclick={closeModal}>Save</button>
+						<button type="submit" class="save" onclick={handleSave}>Save</button>
 					</center>
 				</form>
 			{/if}

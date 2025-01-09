@@ -1,3 +1,4 @@
+mod create;
 mod database;
 mod drag_drop;
 mod export;
@@ -22,6 +23,7 @@ async fn main() -> std::io::Result<()> {
         .route("/api/move", post(drag_drop::handle_move))
         .route("/api/import-bookmarks", post(import::import_bookmarks))
         .route("/api/export", get(export::export_bookmarks))
+        .route("/api/create-folder", post(create::create_folder))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)

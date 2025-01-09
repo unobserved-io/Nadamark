@@ -3,11 +3,7 @@
 	import Icon from '@iconify/svelte';
 	import type { Bookmark, FolderNode } from '$lib/types';
 	import Self from './TreeItem.svelte';
-	import {
-		contextMenuStore,
-		openContextMenu,
-		closeContextMenu
-	} from '$lib/stores/contextMenuStore';
+	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
 
 	let { item, type, refreshTree, showNewItemModal } = $props<{
 		item: FolderNode | Bookmark;
@@ -104,7 +100,7 @@
 			if ($contextMenuStore.isOpen && event.target instanceof Node) {
 				const contextMenu = document.querySelector('.context-menu');
 				if (contextMenu && !contextMenu.contains(event.target)) {
-					closeContextMenu();
+					$contextMenuStore.isOpen = false;
 				}
 			}
 		};

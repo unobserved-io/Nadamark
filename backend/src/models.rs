@@ -88,3 +88,9 @@ pub struct MoveItemRequest {
     pub item_id: i32,
     pub target_folder_id: i32,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct NewFolderRequest {
+    pub name: String,
+    pub parent_id: Option<i32>,
+}

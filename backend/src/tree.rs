@@ -46,35 +46,39 @@ pub async fn refresh_tree() -> impl IntoResponse {
         }
     }
 
-    let mut root_folders: Vec<FolderNode> = Vec::new();
-
-    // First, organize children under their parents
+    // Find all folders in the folders vec without children and add them to their parent folder
     for folder in folders.iter() {
         if let Some(parent_id) = folder.parent_id {
-            if let Some(child_node) = folder_map.get(&folder.id).cloned() {
+            if let Some(child_node) = folder_map.remove(&folder.id) {
                 if let Some(parent_node) = folder_map.get_mut(&parent_id) {
-                    parent_node.children.push(child_node)
+                    parent_node.children.push(child_node);
+                } else {
+                    for folder_node in folder_map.values_mut() {
+                        traverse_folder_nodes(folder_node, child_node.clone());
+                    }
                 }
             }
         }
     }
 
-    // Then collect root folders
-    // Don't combine these, otherwise we could remove root folders before all
-    // their children are added.
-    for folder in folders.iter() {
-        if folder.parent_id.is_none() {
-            if let Some(node) = folder_map.remove(&folder.id) {
-                root_folders.push(node);
-            }
-        }
-    }
-
     let mut root_items = RootItems {
-        root_folders,
+        root_folders: folder_map.values().cloned().collect(),
         root_bookmarks,
     };
     root_items.sort_by_name();
 
     Json(root_items).into_response()
+}
+
+fn traverse_folder_nodes(folder_node: &mut FolderNode, child_node: FolderNode) {
+    if let Some(parent_id) = child_node.folder.parent_id {
+        for child in &mut folder_node.children {
+            if child.folder.id == parent_id {
+                child.children.push(child_node);
+                return;
+            } else {
+                traverse_folder_nodes(child, child_node.clone()); // TODO: efficiency
+            }
+        }
+    };
 }
