@@ -1,19 +1,18 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import type { Bookmark, RootItems } from '$lib/types';
+	import type { Bookmark } from '$lib/types';
 	import { getAllBookmarks } from '$lib/utils/allBookmarks';
+	import { rootItemsStore } from '$lib/stores/rootItemsStore';
 
 	let {
 		isOpen = false,
 		placeholder = 'Search...',
-		folderTree,
 		close,
 		select
 	} = $props<{
 		isOpen?: boolean;
 		placeholder?: string;
-		folderTree: RootItems;
 		close: () => void;
 		select: (bookmark: Bookmark) => void;
 	}>();
@@ -26,7 +25,7 @@
 
 	$effect(() => {
 		if (isOpen) {
-			allBookmarks = getAllBookmarks(folderTree);
+			allBookmarks = getAllBookmarks($rootItemsStore);
 			tick().then(() => {
 				setTimeout(() => {
 					searchInput?.focus();

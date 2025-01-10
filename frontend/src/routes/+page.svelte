@@ -3,16 +3,9 @@
 	import SearchOverlay from '$lib/components/SearchOverlay.svelte';
 	import NewItemModal from '$lib/components/NewItemModal.svelte';
 	import Icon from '@iconify/svelte';
-	import type { RootItems } from '$lib/types';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-
-	let data: { folderTree: RootItems } = { folderTree: { root_folders: [], root_bookmarks: [] } };
-
-	async function refreshTree() {
-		const treeResult = await fetch('http://localhost:3096/api/folder-tree');
-		data.folderTree = await treeResult.json();
-	}
+	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
 
 	function handleKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
@@ -124,10 +117,6 @@
 
 	// New Item Modal
 	let showNewItemModal = false;
-
-	function openNewItemModal() {
-		showNewItemModal = true;
-	}
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
@@ -172,21 +161,15 @@
 </div>
 <div class="tree-view">
 	<ul>
-		{#each data.folderTree.root_folders as folder}
+		{#each $rootItemsStore.root_folders as folder}
 			<li>
-				<TreeItem
-					item={folder}
-					type="folder"
-					{refreshTree}
-					showNewItemModal={() => (showNewItemModal = true)}
-				/>
+				<TreeItem item={folder} type="folder" showNewItemModal={() => (showNewItemModal = true)} />
 			</li>
 		{/each}
-		{#each data.folderTree.root_bookmarks as bookmark}
+		{#each $rootItemsStore.root_bookmarks as bookmark}
 			<TreeItem
 				item={bookmark}
 				type="bookmark"
-				{refreshTree}
 				showNewItemModal={() => (showNewItemModal = true)}
 			/>
 		{/each}
@@ -195,7 +178,6 @@
 
 <SearchOverlay
 	isOpen={showSearch}
-	folderTree={data.folderTree}
 	close={() => (showSearch = false)}
 	select={(bookmark) => {
 		showSearch = false;
@@ -205,13 +187,6 @@
 		a.rel = 'noreferrer';
 		a.click();
 	}}
-/>
-
-<NewItemModal
-	showModal={showNewItemModal}
-	type="folder"
-	folderTree={data.folderTree}
-	{refreshTree}
 />
 
 <style>

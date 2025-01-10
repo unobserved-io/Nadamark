@@ -1,15 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
-	import type { Bookmark, FolderNode } from '$lib/types';
+	import type { Bookmark, FolderNode, RootItems } from '$lib/types';
 	import Self from './TreeItem.svelte';
 	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
+	import NewItemModal from './NewItemModal.svelte';
+	import { refreshTree } from '$lib/stores/rootItemsStore';
 
-	let { item, type, refreshTree, showNewItemModal } = $props<{
+	let { item, type } = $props<{
 		item: FolderNode | Bookmark;
 		type: 'folder' | 'bookmark';
-		refreshTree: () => void;
-		showNewItemModal: () => void;
+		// showNewItemModal: () => void;
 	}>();
 
 	function isFolder(item: FolderNode | Bookmark): item is FolderNode {
@@ -110,6 +111,15 @@
 			document.removeEventListener('click', handleClick);
 		};
 	});
+
+	// New Item Modal
+	let modalType = $state('');
+	let showNewItemModal = $state(false);
+
+	function handleShowNewItemModal(type: string) {
+		modalType = type;
+		showNewItemModal = true;
+	}
 </script>
 
 {#if type === 'folder' && isFolder(item)}
@@ -134,7 +144,7 @@
 			<ul class="folder-children">
 				{#each item.children as child}
 					<li class="folder-item">
-						<Self item={child} type="folder" {refreshTree} {showNewItemModal} />
+						<Self item={child} type="folder" />
 					</li>
 				{/each}
 				{#each item.bookmarks as bookmark}
@@ -176,12 +186,10 @@
 			<ul>
 				{#if $contextMenuStore.type === 'folder'}
 					<li>
-						<button onclick={showNewItemModal}>New folder</button>
+						<button onclick={() => handleShowNewItemModal('folder')}>New folder</button>
 					</li>
 					<li>
-						<button onclick={() => console.log('New bookmark inside', $contextMenuStore.data)}
-							>New bookmark</button
-						>
+						<button onclick={() => handleShowNewItemModal('bookmark')}>New bookmark</button>
 					</li>
 					<li>
 						<button onclick={() => console.log('New folder inside', $contextMenuStore.data)}
@@ -219,6 +227,12 @@
 		</div>
 	</nav>
 {/if}
+
+<NewItemModal
+	showModal={showNewItemModal}
+	type={modalType}
+	close={() => (showNewItemModal = false)}
+/>
 
 <style>
 	.tree-item {

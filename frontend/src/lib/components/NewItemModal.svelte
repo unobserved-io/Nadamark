@@ -1,27 +1,27 @@
 <script lang="ts">
-	import type { Folder, RootItems } from '$lib/types';
+	import type { Folder } from '$lib/types';
 	import { getAllFolders } from '$lib/utils/allFolders';
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
+	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
 
 	let {
 		showModal = false,
 		type,
-		folderTree,
-		refreshTree
+		close
 	} = $props<{
 		showModal: boolean;
 		type: string;
-		folderTree: RootItems;
-		refreshTree: () => void;
+		close: () => void;
 	}>();
 
 	let allFolders: Folder[] = $state([]);
 	let selectedFolder: number | undefined = $state();
 	let itemName = $state('');
+	let itemUrl = $state('');
 
 	$effect(() => {
 		if (showModal) {
-			allFolders = getAllFolders(folderTree);
+			allFolders = getAllFolders($rootItemsStore);
 			selectedFolder = $contextMenuStore.data?.id;
 		}
 	});
@@ -51,7 +51,8 @@
 					},
 					body: JSON.stringify({
 						name: itemName,
-						parent_id: selectedFolder
+						url: itemUrl,
+						folder_id: selectedFolder
 					})
 				});
 
@@ -68,21 +69,61 @@
 		closeModal();
 	}
 
+	function handleKeyDown(event: KeyboardEvent) {
+		switch (event.key) {
+			case 'Escape':
+				closeModal();
+				break;
+		}
+	}
+
 	function closeModal() {
-		showModal = false;
+		itemName = '';
+		allFolders = [];
+		selectedFolder = undefined;
+		close();
 	}
 </script>
+
+<svelte:window onkeydown={handleKeyDown} />
 
 {#if showModal}
 	<div class="modal">
 		<div class="modal-content">
+			<button class="close" onclick={closeModal}>&times;</button>
 			{#if type == 'folder'}
-				<button class="close" onclick={closeModal}>&times;</button>
 				<h1>New Folder</h1>
 				<form>
 					<div class="form-group">
 						<label for="name">Name</label>
 						<input type="text" name="name" required bind:value={itemName} />
+					</div>
+
+					<div class="form-group">
+						<label for="location">Location</label>
+						<select name="folders" id="location" bind:value={selectedFolder}>
+							<option value={undefined}></option>
+							{#each allFolders as folder}
+								<option value={folder.id}>{folder.name}</option>
+							{/each}
+						</select>
+					</div>
+
+					<center>
+						<button type="submit" class="save" onclick={handleSave}>Save</button>
+					</center>
+				</form>
+			{:else if type == 'bookmark'}
+				<h1>New Bookmark</h1>
+				<form>
+					<div class="form-group">
+						<label for="name">Name</label>
+						<input type="text" name="name" required bind:value={itemName} />
+					</div>
+
+					<div class="form-group">
+						<label for="url">URL</label>
+						<input type="url" name="url" required bind:value={itemUrl} />
 					</div>
 
 					<div class="form-group">

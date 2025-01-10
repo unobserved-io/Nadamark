@@ -56,7 +56,7 @@ pub fn create_new_folder(name: String, parent_id: Option<i32>) -> Result<usize, 
 
     let connection = &mut establish_connection();
 
-    let id = get_highest_folder_id()? + 1;
+    let id = get_highest_folder_id()? + 1; // TODO: Insert without ID
 
     diesel::insert_into(folders::table)
         .values(Folder {
@@ -64,6 +64,29 @@ pub fn create_new_folder(name: String, parent_id: Option<i32>) -> Result<usize, 
             name,
             created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
             parent_id,
+        })
+        .execute(connection)
+}
+
+pub fn create_new_bookmark(
+    name: String,
+    url: String,
+    folder_id: Option<i32>,
+) -> Result<usize, Error> {
+    use crate::schema::bookmarks;
+
+    let connection = &mut establish_connection();
+
+    let id = get_highest_bookmark_id()? + 1; // TODO: Insert without ID
+
+    diesel::insert_into(bookmarks::table)
+        .values(Bookmark {
+            id,
+            name,
+            url,
+            favicon_url: None,
+            created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
+            folder_id,
         })
         .execute(connection)
 }
