@@ -29,44 +29,50 @@
 	async function handleSave() {
 		try {
 			if (type == 'folder') {
-				const response = await fetch('http://localhost:3096/api/create-folder', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						name: itemName,
-						parent_id: selectedFolder
-					})
-				});
+				if (itemName.trim().length > 0) {
+					console.log('Inside');
+					const response = await fetch('http://localhost:3096/api/create-folder', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							name: itemName,
+							parent_id: selectedFolder
+						})
+					});
 
-				if (!response.ok) {
-					throw new Error('Failed to create folder');
+					if (!response.ok) {
+						throw new Error('Failed to create folder');
+					}
+					refreshTree();
+					closeModal();
 				}
 			} else if (type == 'bookmark') {
-				const response = await fetch('http://localhost:3096/api/create-bookmark', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						name: itemName,
-						url: itemUrl,
-						folder_id: selectedFolder
-					})
-				});
+				if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
+					const response = await fetch('http://localhost:3096/api/create-bookmark', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							name: itemName,
+							url: itemUrl,
+							folder_id: selectedFolder
+						})
+					});
 
-				if (!response.ok) {
-					throw new Error('Failed to create bookmark');
+					if (!response.ok) {
+						throw new Error('Failed to create bookmark');
+					}
+					refreshTree();
+					closeModal();
 				}
 			}
-
-			refreshTree();
 		} catch (err) {
 			console.error('Creation failed:', err);
+			closeModal();
 		}
-
-		closeModal();
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
