@@ -187,7 +187,7 @@
 	</div>
 {:else if type === 'bookmark' && isBookmark(item)}
 	<li
-		class="bookmark-item"
+		class="bookmark-root-item"
 		draggable="true"
 		ondragstart={(e) => handleDragStart(e, 'bookmark', item)}
 	>
@@ -281,7 +281,8 @@
 	}
 
 	li.folder-item,
-	li.bookmark-item {
+	li.bookmark-item,
+	li.bookmark-root-item {
 		margin: 0.5em 0;
 		position: relative;
 	}
