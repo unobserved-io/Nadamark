@@ -119,6 +119,28 @@
 		modalType = type;
 		showNewItemModal = true;
 	}
+
+	// Favorite
+	async function toggleFavorite() {
+		$contextMenuStore.isOpen = false;
+		try {
+			const response = await fetch('http://localhost:3096/api/favorite-bookmark', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify($contextMenuStore.data?.id)
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			} else {
+				refreshTree();
+			}
+		} catch (error) {
+			console.error('Error toggling favorite:', error);
+		}
+	}
 </script>
 
 {#if type === 'folder' && isFolder(item)}
@@ -169,7 +191,11 @@
 		draggable="true"
 		ondragstart={(e) => handleDragStart(e, 'bookmark', item)}
 	>
-		<a href={item.url} oncontextmenu={(event) => handleContextMenu(event, 'bookmark', item)}>
+		<a
+			href={item.url}
+			target="_blank"
+			oncontextmenu={(event) => handleContextMenu(event, 'bookmark', item)}
+		>
 			{item.name}
 		</a>
 	</li>
@@ -191,11 +217,6 @@
 						<button onclick={() => handleShowNewItemModal('bookmark')}>New bookmark</button>
 					</li>
 					<li>
-						<button onclick={() => console.log('New folder inside', $contextMenuStore.data)}
-							>Favorite</button
-						>
-					</li>
-					<li>
 						<button onclick={() => console.log('Rename folder', $contextMenuStore.data)}
 							>Edit</button
 						>
@@ -207,8 +228,8 @@
 					</li>
 				{:else if $contextMenuStore.type === 'bookmark'}
 					<li>
-						<button onclick={() => console.log('Open bookmark', $contextMenuStore.data)}
-							>Favorite</button
+						<button onclick={toggleFavorite}
+							>{$contextMenuStore.data?.favorite ? 'Unfavorite' : 'Favorite'}</button
 						>
 					</li>
 					<li>

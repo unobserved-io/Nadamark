@@ -1,5 +1,7 @@
 use crate::models::{Bookmark, Folder};
-use diesel::{prelude::*, result::Error, Connection, ExpressionMethods, SqliteConnection};
+use diesel::{
+    dsl::not, prelude::*, result::Error, Connection, ExpressionMethods, SqliteConnection,
+};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use directories::ProjectDirs;
 use std::fs;
@@ -145,6 +147,16 @@ pub fn change_bookmark_folder(bookmark_id: i32, new_folder_id: i32) -> Result<us
 
     diesel::update(bookmarks.find(bookmark_id))
         .set(folder_id.eq(new_folder_id))
+        .execute(connection)
+}
+
+pub fn toggle_bookmark_favorite(bookmark_id: i32) -> Result<usize, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    diesel::update(bookmarks.find(bookmark_id))
+        .set(favorite.eq(not(favorite)))
         .execute(connection)
 }
 

@@ -4,6 +4,7 @@ mod drag_drop;
 mod export;
 mod import;
 mod models;
+mod modify;
 mod schema;
 mod tree;
 
@@ -21,10 +22,11 @@ async fn main() -> std::io::Result<()> {
     let router = Router::new()
         .route("/api/folder-tree", get(tree::refresh_tree))
         .route("/api/move", post(drag_drop::handle_move))
-        .route("/api/import-bookmarks", post(import::import_bookmarks))
+        .route("/api/import-html", post(import::import_bookmarks))
         .route("/api/export", get(export::export_bookmarks))
         .route("/api/create-folder", post(create::create_folder))
         .route("/api/create-bookmark", post(create::create_bookmark))
+        .route("/api/favorite-bookmark", post(modify::favorite_bookmark))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)

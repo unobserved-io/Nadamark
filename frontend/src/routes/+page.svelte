@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
+	import FavoritesBar from '$lib/components/FavoritesBar.svelte';
 
 	function handleKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
@@ -59,7 +60,7 @@
 		try {
 			const fileContent = await file.text();
 
-			const response = await fetch('http://localhost:3096/api/import-bookmarks', {
+			const response = await fetch('http://localhost:3096/api/import-html', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/html'
@@ -81,6 +82,7 @@
 			isLoading = false;
 			// Reset file input
 			fileInput.value = '';
+			hamburgerMenuIsOpen = false;
 		}
 	}
 
@@ -140,7 +142,6 @@
 				<input
 					id="bookmarkHTMLUpload"
 					bind:this={fileInput}
-					onclick={toggleDropDown}
 					type="file"
 					accept=".html"
 					onchange={handleInputChange}
@@ -155,6 +156,9 @@
 		{/if}
 	</div>
 </div>
+
+<FavoritesBar />
+
 <div class="tree-view">
 	<ul>
 		{#each $rootItemsStore.root_folders as folder}
