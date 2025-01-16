@@ -5,6 +5,7 @@ export interface Bookmark {
 	favicon: string;
 	created: string;
 	folder_id: number;
+	favorite: boolean;
 }
 
 export interface Folder {

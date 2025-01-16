@@ -96,6 +96,7 @@ fn parse_bookmarks_html(html: &str) -> Result<(Vec<Folder>, Vec<Bookmark>), Stri
                 favicon_url,
                 created,
                 folder_id,
+                favorite: false,
             });
 
             bookmark_id_counter += 1;

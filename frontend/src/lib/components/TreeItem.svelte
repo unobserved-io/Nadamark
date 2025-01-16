@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '@iconify/svelte';
-	import type { Bookmark, FolderNode, RootItems } from '$lib/types';
+	import type { Bookmark, FolderNode } from '$lib/types';
 	import Self from './TreeItem.svelte';
 	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
 	import NewItemModal from './NewItemModal.svelte';
@@ -10,7 +10,6 @@
 	let { item, type } = $props<{
 		item: FolderNode | Bookmark;
 		type: 'folder' | 'bookmark';
-		// showNewItemModal: () => void;
 	}>();
 
 	function isFolder(item: FolderNode | Bookmark): item is FolderNode {

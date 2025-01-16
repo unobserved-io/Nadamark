@@ -1,7 +1,6 @@
 <script lang="ts">
 	import TreeItem from '$lib/components/TreeItem.svelte';
 	import SearchOverlay from '$lib/components/SearchOverlay.svelte';
-	import NewItemModal from '$lib/components/NewItemModal.svelte';
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
@@ -114,9 +113,6 @@
 
 	// Search
 	let showSearch = false;
-
-	// New Item Modal
-	let showNewItemModal = false;
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
@@ -163,15 +159,11 @@
 	<ul>
 		{#each $rootItemsStore.root_folders as folder}
 			<li>
-				<TreeItem item={folder} type="folder" showNewItemModal={() => (showNewItemModal = true)} />
+				<TreeItem item={folder} type="folder" />
 			</li>
 		{/each}
 		{#each $rootItemsStore.root_bookmarks as bookmark}
-			<TreeItem
-				item={bookmark}
-				type="bookmark"
-				showNewItemModal={() => (showNewItemModal = true)}
-			/>
+			<TreeItem item={bookmark} type="bookmark" />
 		{/each}
 	</ul>
 </div>

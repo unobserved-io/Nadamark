@@ -87,6 +87,7 @@ pub fn create_new_bookmark(
             favicon_url: None,
             created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
             folder_id,
+            favorite: false,
         })
         .execute(connection)
 }

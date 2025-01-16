@@ -23,6 +23,7 @@ pub struct Bookmark {
     pub favicon_url: Option<String>,
     pub created: time::OffsetDateTime,
     pub folder_id: Option<i32>,
+    pub favorite: bool,
 }
 
 #[derive(Serialize, Deserialize, Clone)]

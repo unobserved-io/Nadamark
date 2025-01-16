@@ -15,5 +15,6 @@ diesel::table! {
         favicon_url -> Nullable<Text>,
         created -> TimestamptzSqlite,
         folder_id -> Nullable<Integer>,
+        favorite -> Bool,
     }
 }
