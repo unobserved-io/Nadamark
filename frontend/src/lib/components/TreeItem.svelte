@@ -151,6 +151,34 @@
 			console.error('Error toggling favorite:', error);
 		}
 	}
+
+	// Delete Item
+	async function deleteItem(type: string) {
+		$contextMenuStore.isOpen = false;
+		let apiUrl: string = '';
+		try {
+			if (type == 'folder') {
+				apiUrl = 'http://localhost:3096/api/delete-folder';
+			} else if (type == 'bookmark') {
+				apiUrl = 'http://localhost:3096/api/delete-bookmark';
+			}
+			const response = await fetch(apiUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify($contextMenuStore.data?.id)
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			} else {
+				refreshTree();
+			}
+		} catch (error) {
+			console.error('Error deleting item:', error);
+		}
+	}
 </script>
 
 {#if type === 'folder' && isFolder(item)}
@@ -231,9 +259,7 @@
 						<button onclick={() => handleShowEditModal('folder')}>Edit</button>
 					</li>
 					<li>
-						<button onclick={() => console.log('Delete folder', $contextMenuStore.data)}
-							>Delete</button
-						>
+						<button onclick={() => deleteItem('folder')}>Delete</button>
 					</li>
 				{:else if $contextMenuStore.type === 'bookmark'}
 					<li>
@@ -245,9 +271,7 @@
 						<button onclick={() => handleShowEditModal('bookmark')}>Edit</button>
 					</li>
 					<li>
-						<button onclick={() => console.log('Delete bookmark', $contextMenuStore.data)}
-							>Delete</button
-						>
+						<button onclick={() => deleteItem('bookmark')}>Delete</button>
 					</li>
 				{/if}
 			</ul>

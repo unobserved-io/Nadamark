@@ -132,6 +132,17 @@ pub fn get_all_bookmarks() -> Result<Vec<Bookmark>, Error> {
     bookmarks.load(connection)
 }
 
+pub fn fetch_child_bookmarks(parent_id: i32) -> Result<Vec<Bookmark>, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    bookmarks
+        .filter(folder_id.eq(parent_id))
+        .select(Bookmark::as_select())
+        .load(connection)
+}
+
 pub fn update_folder(folder: UpdateFolderRequest) -> Result<usize, Error> {
     use crate::schema::folders::dsl::*;
 
@@ -154,6 +165,30 @@ pub fn update_bookmark(bookmark: UpdateBookmarkRequest) -> Result<usize, Error> 
             folder_id.eq(bookmark.folder_id),
         ))
         .execute(connection)
+}
+
+pub fn delete_folder(folder_id: i32) -> Result<usize, Error> {
+    use crate::schema::folders::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    if let Ok(bookmarks) = fetch_child_bookmarks(folder_id) {
+        for bookmark in bookmarks {
+            if let Err(e) = delete_bookmark(bookmark.id) {
+                eprintln!("Error deleting child bookmark: {}", e);
+            }
+        }
+    }
+
+    diesel::delete(folders.filter(id.eq(folder_id))).execute(connection)
+}
+
+pub fn delete_bookmark(bookmark_id: i32) -> Result<usize, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    diesel::delete(bookmarks.filter(id.eq(bookmark_id))).execute(connection)
 }
 
 pub fn change_folder_parent(folder_id: i32, new_parent_id: i32) -> Result<usize, Error> {

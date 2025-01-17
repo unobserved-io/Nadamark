@@ -31,3 +31,21 @@ pub async fn update_bookmark(Json(payload): Json<UpdateBookmarkRequest>) -> impl
 
     Ok(StatusCode::OK)
 }
+
+pub async fn delete_folder(Json(payload): Json<i32>) -> impl IntoResponse {
+    if let Err(e) = database::delete_folder(payload) {
+        eprintln!("Failed to delete folder: {}", e);
+        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    Ok(StatusCode::OK)
+}
+
+pub async fn delete_bookmark(Json(payload): Json<i32>) -> impl IntoResponse {
+    if let Err(e) = database::delete_bookmark(payload) {
+        eprintln!("Failed to delete bookmark: {}", e);
+        return Err(StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    Ok(StatusCode::OK)
+}
