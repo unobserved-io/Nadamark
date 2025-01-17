@@ -10,6 +10,7 @@ pub struct Folder {
     pub name: String,
     pub created: time::OffsetDateTime,
     pub parent_id: Option<i32>,
+    pub favorite: bool,
 }
 
 #[derive(Queryable, Selectable, Insertable)]
@@ -20,6 +21,7 @@ pub struct Bookmark {
     pub id: i32,
     pub name: String,
     pub url: String,
+    pub favicon: Option<String>,
     pub favicon_url: Option<String>,
     pub created: time::OffsetDateTime,
     pub folder_id: Option<i32>,

@@ -2,5 +2,6 @@ CREATE TABLE IF NOT EXISTS folders (
     id INTEGER PRIMARY KEY,
     name TEXT,
     created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    parent_id INTEGER REFERENCES folders (id)
+    parent_id INTEGER REFERENCES folders (id),
+    favorite BOOL
 )

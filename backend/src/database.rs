@@ -66,6 +66,7 @@ pub fn create_new_folder(name: String, parent_id: Option<i32>) -> Result<usize, 
             name,
             created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
             parent_id,
+            favorite: false,
         })
         .execute(connection)
 }
@@ -86,6 +87,7 @@ pub fn create_new_bookmark(
             id,
             name,
             url,
+            favicon: None,
             favicon_url: None,
             created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
             folder_id,

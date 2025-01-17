@@ -229,7 +229,7 @@
 				{:else if $contextMenuStore.type === 'bookmark'}
 					<li>
 						<button onclick={toggleFavorite}
-							>{$contextMenuStore.data?.favorite ? 'Unfavorite' : 'Favorite'}</button
+							>{($contextMenuStore.data as Bookmark)?.favorite ? 'Unfavorite' : 'Favorite'}</button
 						>
 					</li>
 					<li>

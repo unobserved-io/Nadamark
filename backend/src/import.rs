@@ -63,6 +63,7 @@ fn parse_bookmarks_html(html: &str) -> Result<(Vec<Folder>, Vec<Bookmark>), Stri
             name: folder_name,
             created,
             parent_id: parent_folder_id,
+            favorite: false,
         });
 
         folder_id_counter += 1;
@@ -71,6 +72,7 @@ fn parse_bookmarks_html(html: &str) -> Result<(Vec<Folder>, Vec<Bookmark>), Stri
     for bookmark_element in dom.select(&bookmark_selector) {
         if let Some(url) = bookmark_element.value().attr("href") {
             let name = bookmark_element.text().collect::<String>();
+            let favicon = bookmark_element.value().attr("icon").map(String::from);
             let favicon_url = bookmark_element.value().attr("icon_uri").map(String::from);
 
             // Find parent folder
@@ -93,6 +95,7 @@ fn parse_bookmarks_html(html: &str) -> Result<(Vec<Folder>, Vec<Bookmark>), Stri
                 id: bookmark_id_counter,
                 name,
                 url: url.to_string(),
+                favicon,
                 favicon_url,
                 created,
                 folder_id,
