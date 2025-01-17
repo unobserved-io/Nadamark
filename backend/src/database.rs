@@ -1,4 +1,4 @@
-use crate::models::{Bookmark, Folder};
+use crate::models::{Bookmark, Folder, UpdateBookmarkRequest, UpdateFolderRequest};
 use diesel::{
     dsl::not, prelude::*, result::Error, Connection, ExpressionMethods, SqliteConnection,
 };
@@ -130,6 +130,30 @@ pub fn get_all_bookmarks() -> Result<Vec<Bookmark>, Error> {
     let connection = &mut establish_connection();
 
     bookmarks.load(connection)
+}
+
+pub fn update_folder(folder: UpdateFolderRequest) -> Result<usize, Error> {
+    use crate::schema::folders::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    diesel::update(folders.find(folder.id))
+        .set((parent_id.eq(folder.parent_id), name.eq(folder.name)))
+        .execute(connection)
+}
+
+pub fn update_bookmark(bookmark: UpdateBookmarkRequest) -> Result<usize, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    diesel::update(bookmarks.find(bookmark.id))
+        .set((
+            name.eq(bookmark.name),
+            url.eq(bookmark.url),
+            folder_id.eq(bookmark.folder_id),
+        ))
+        .execute(connection)
 }
 
 pub fn change_folder_parent(folder_id: i32, new_parent_id: i32) -> Result<usize, Error> {

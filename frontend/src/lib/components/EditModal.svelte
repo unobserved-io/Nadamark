@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Folder } from '$lib/types';
+	import type { Bookmark, Folder } from '$lib/types';
 	import { getAllFolders } from '$lib/utils/allFolders';
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
 	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
@@ -15,14 +15,24 @@
 	}>();
 
 	let allFolders: Folder[] = $state([]);
-	let selectedFolder: number | undefined = $state();
-	let itemName = $state('');
+	let selectedFolder: number | null = $state(null);
+	let itemName: string = $state('');
 	let itemUrl = $state('');
 
 	$effect(() => {
 		if (showModal) {
-			allFolders = getAllFolders($rootItemsStore);
-			selectedFolder = $contextMenuStore.data?.id;
+			if ($contextMenuStore.data) {
+				allFolders = getAllFolders($rootItemsStore);
+
+				itemName = $contextMenuStore.data.name;
+
+				if (type == `folder`) {
+					selectedFolder = ($contextMenuStore.data as Folder).parent_id;
+				} else if (type == 'bookmark') {
+					selectedFolder = ($contextMenuStore.data as Bookmark).folder_id;
+					itemUrl = ($contextMenuStore.data as Bookmark).url;
+				}
+			}
 		}
 	});
 
@@ -30,31 +40,33 @@
 		try {
 			if (type == 'folder') {
 				if (itemName.trim().length > 0) {
-					const response = await fetch('http://localhost:3096/api/create-folder', {
+					const response = await fetch('http://localhost:3096/api/update-folder', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({
+							id: $contextMenuStore.data?.id,
 							name: itemName,
 							parent_id: selectedFolder
 						})
 					});
 
 					if (!response.ok) {
-						throw new Error('Failed to create folder');
+						throw new Error('Failed to update folder');
 					}
 					refreshTree();
 					closeModal();
 				}
 			} else if (type == 'bookmark') {
 				if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-					const response = await fetch('http://localhost:3096/api/create-bookmark', {
+					const response = await fetch('http://localhost:3096/api/update-bookmark', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({
+							id: $contextMenuStore.data?.id,
 							name: itemName,
 							url: itemUrl,
 							folder_id: selectedFolder
@@ -62,14 +74,14 @@
 					});
 
 					if (!response.ok) {
-						throw new Error('Failed to create bookmark');
+						throw new Error('Failed to update bookmark');
 					}
 					refreshTree();
 					closeModal();
 				}
 			}
 		} catch (err) {
-			console.error('Creation failed:', err);
+			console.error('Edit failed:', err);
 			closeModal();
 		}
 	}
@@ -85,7 +97,7 @@
 	function closeModal() {
 		itemName = '';
 		allFolders = [];
-		selectedFolder = undefined;
+		selectedFolder = null;
 		close();
 	}
 </script>
@@ -97,7 +109,7 @@
 		<div class="modal-content">
 			<button class="close" onclick={closeModal}>&times;</button>
 			{#if type == 'folder'}
-				<h1>New Folder</h1>
+				<h1>Edit {$contextMenuStore.data?.name}</h1>
 				<form>
 					<div class="form-group">
 						<label for="name">Name</label>
@@ -119,7 +131,7 @@
 					</center>
 				</form>
 			{:else if type == 'bookmark'}
-				<h1>New Bookmark</h1>
+				<h1>Edit {$contextMenuStore.data?.name}</h1>
 				<form>
 					<div class="form-group">
 						<label for="name">Name</label>

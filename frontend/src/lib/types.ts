@@ -3,8 +3,9 @@ export interface Bookmark {
 	name: string;
 	url: string;
 	favicon: string;
+	favicon_url: string;
 	created: string;
-	folder_id: number;
+	folder_id: number | null;
 	favorite: boolean;
 }
 

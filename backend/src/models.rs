@@ -91,3 +91,18 @@ pub struct MoveItemRequest {
     pub item_id: i32,
     pub target_folder_id: i32,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateFolderRequest {
+    pub id: i32,
+    pub name: String,
+    pub parent_id: Option<i32>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateBookmarkRequest {
+    pub id: i32,
+    pub name: String,
+    pub url: String,
+    pub folder_id: Option<i32>,
+}

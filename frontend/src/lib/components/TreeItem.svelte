@@ -5,6 +5,7 @@
 	import Self from './TreeItem.svelte';
 	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
 	import NewItemModal from './NewItemModal.svelte';
+	import EditModal from './EditModal.svelte';
 	import { refreshTree } from '$lib/stores/rootItemsStore';
 
 	let { item, type } = $props<{
@@ -112,12 +113,21 @@
 	});
 
 	// New Item Modal
-	let modalType = $state('');
+	let newItemModalType = $state('');
 	let showNewItemModal = $state(false);
 
 	function handleShowNewItemModal(type: string) {
-		modalType = type;
+		newItemModalType = type;
 		showNewItemModal = true;
+	}
+
+	// Edit Modal
+	let editModalType = $state('');
+	let showEditModal = $state(false);
+
+	function handleShowEditModal(type: string) {
+		editModalType = type;
+		showEditModal = true;
 	}
 
 	// Favorite
@@ -176,6 +186,7 @@
 					>
 						<a
 							href={bookmark.url}
+							target="_blank"
 							oncontextmenu={(event) => handleContextMenu(event, 'bookmark', bookmark)}
 						>
 							{bookmark.name}
@@ -217,9 +228,7 @@
 						<button onclick={() => handleShowNewItemModal('bookmark')}>New bookmark</button>
 					</li>
 					<li>
-						<button onclick={() => console.log('Rename folder', $contextMenuStore.data)}
-							>Edit</button
-						>
+						<button onclick={() => handleShowEditModal('folder')}>Edit</button>
 					</li>
 					<li>
 						<button onclick={() => console.log('Delete folder', $contextMenuStore.data)}
@@ -233,9 +242,7 @@
 						>
 					</li>
 					<li>
-						<button onclick={() => console.log('Rename bookmark', $contextMenuStore.data)}
-							>Edit</button
-						>
+						<button onclick={() => handleShowEditModal('bookmark')}>Edit</button>
 					</li>
 					<li>
 						<button onclick={() => console.log('Delete bookmark', $contextMenuStore.data)}
@@ -250,9 +257,11 @@
 
 <NewItemModal
 	showModal={showNewItemModal}
-	type={modalType}
+	type={newItemModalType}
 	close={() => (showNewItemModal = false)}
 />
+
+<EditModal showModal={showEditModal} type={editModalType} close={() => (showEditModal = false)} />
 
 <style>
 	.tree-item {

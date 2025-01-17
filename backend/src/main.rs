@@ -27,6 +27,8 @@ async fn main() -> std::io::Result<()> {
         .route("/api/create-folder", post(create::create_folder))
         .route("/api/create-bookmark", post(create::create_bookmark))
         .route("/api/favorite-bookmark", post(modify::favorite_bookmark))
+        .route("/api/update-folder", post(modify::update_folder))
+        .route("/api/update-bookmark", post(modify::update_bookmark))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
