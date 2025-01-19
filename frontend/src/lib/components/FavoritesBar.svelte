@@ -1,12 +1,41 @@
 <script lang="ts">
-	import type { Bookmark } from '$lib/types';
+	import type { Bookmark, FolderNode } from '$lib/types';
 	import { rootItemsStore } from '$lib/stores/rootItemsStore';
 	import { getAllFavorites } from '$lib/utils/allBookmarks';
+	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
+	import { onMount } from 'svelte';
 
 	let allFavorites: Bookmark[] = $state([]);
 
 	$effect(() => {
 		allFavorites = getAllFavorites($rootItemsStore);
+	});
+
+	// Context menu
+	function handleContextMenu(
+		event: MouseEvent,
+		type: 'folder' | 'bookmark',
+		data: FolderNode | Bookmark
+	) {
+		event.preventDefault();
+		openContextMenu(type, data, { x: event.pageX, y: event.pageY });
+	}
+
+	onMount(() => {
+		// Close context menu if user clicks outside of menu
+		const handleClick = (event: MouseEvent) => {
+			if ($contextMenuStore.isOpen && event.target instanceof Node) {
+				const contextMenu = document.querySelector('.context-menu');
+				if (contextMenu && !contextMenu.contains(event.target)) {
+					$contextMenuStore.isOpen = false;
+				}
+			}
+		};
+
+		document.addEventListener('click', handleClick);
+		return () => {
+			document.removeEventListener('click', handleClick);
+		};
 	});
 </script>
 
@@ -14,7 +43,14 @@
 	<div class="favorites">
 		<ul>
 			{#each allFavorites as favorite}
-				<li><a href={favorite.url} target="_blank">{favorite.name}</a></li>
+				<li>
+					<a
+						href={favorite.url}
+						target="_blank"
+						oncontextmenu={(event) => handleContextMenu(event, 'bookmark', favorite)}
+						>{favorite.name}</a
+					>
+				</li>
 			{/each}
 		</ul>
 	</div>
