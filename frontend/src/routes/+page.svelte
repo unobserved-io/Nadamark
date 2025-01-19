@@ -19,7 +19,7 @@
 	}
 
 	// Drop-down hamburger menu
-	let hamburgerMenuIsOpen = false;
+	let hamburgerMenuIsOpen = $state(false);
 	let dropDownRef: HTMLDivElement;
 
 	function handleClickOutside(event: MouseEvent) {
@@ -41,10 +41,8 @@
 	});
 
 	// Import Bookmarks
-	let htmlFileInput: HTMLInputElement;
-	let jsonFileInput: HTMLInputElement;
-	let status: string = '';
-	let isLoading: boolean = false;
+	let status: string = $state('');
+	let isLoading: boolean = $state(false);
 
 	async function handleFileSelect(event: Event): Promise<void> {
 		const target = event.target as HTMLInputElement;
@@ -91,12 +89,6 @@
 			status = `Error importing bookmarks: ${error instanceof Error ? error.message : 'Unknown error'}`;
 		} finally {
 			isLoading = false;
-			// Reset file input
-			if (file.name.endsWith('.html')) {
-				htmlFileInput.value = '';
-			} else {
-				jsonFileInput.value = '';
-			}
 			hamburgerMenuIsOpen = false;
 		}
 	}
@@ -129,7 +121,41 @@
 	}
 
 	// Search
-	let showSearch = false;
+	let showSearch = $state(false);
+
+	// Drag to root
+	let isDragging = $state(false);
+
+	async function handleRootDrop(e: DragEvent) {
+		e.preventDefault();
+		isDragging = false;
+
+		if (!e.dataTransfer) return;
+
+		try {
+			const data = JSON.parse(e.dataTransfer.getData('application/json'));
+
+			const response = await fetch('http://localhost:3096/api/move-to-root', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					item_type: data.type,
+					item_id: data.id,
+					target_folder_id: 0
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to move item to root');
+			}
+
+			refreshTree();
+		} catch (err) {
+			console.error('Drop failed:', err);
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
@@ -165,7 +191,6 @@
 						</label>
 						<input
 							id="bookmarkHTMLUpload"
-							bind:this={htmlFileInput}
 							type="file"
 							accept=".html"
 							onchange={handleInputChange}
@@ -178,7 +203,6 @@
 						</label>
 						<input
 							id="bookmarkLinkwardenUpload"
-							bind:this={jsonFileInput}
 							type="file"
 							accept=".json"
 							onchange={handleInputChange}
@@ -198,6 +222,19 @@
 
 <FavoritesBar />
 
+<div
+	class="root-drop-zone top"
+	class:drag-active={isDragging}
+	ondragover={(e) => e.preventDefault()}
+	ondragenter={() => (isDragging = true)}
+	ondragleave={() => (isDragging = false)}
+	ondrop={handleRootDrop}
+	role="region"
+	aria-label="Drop zone for root level items"
+>
+	Drop here to un-nest
+</div>
+
 <div class="tree-view">
 	<ul>
 		{#each $rootItemsStore.root_folders as folder}
@@ -209,6 +246,19 @@
 			<TreeItem item={bookmark} type="bookmark" />
 		{/each}
 	</ul>
+</div>
+
+<div
+	class="root-drop-zone bottom"
+	class:drag-active={isDragging}
+	ondragover={(e) => e.preventDefault()}
+	ondragenter={() => (isDragging = true)}
+	ondragleave={() => (isDragging = false)}
+	ondrop={handleRootDrop}
+	role="region"
+	aria-label="Drop zone for root level items"
+>
+	Drop here to un-nest
 </div>
 
 <SearchOverlay
@@ -314,5 +364,23 @@
 
 	.dropdown-item:hover {
 		background-color: #f5f5f5;
+	}
+
+	.root-drop-zone {
+		display: none;
+		padding: 1rem;
+		margin: 0.5rem;
+		border: 2px dashed #ccc;
+		border-radius: 4px;
+		text-align: center;
+		color: #666;
+	}
+
+	.root-drop-zone.drag-active {
+		background-color: rgba(0, 0, 0, 0.05);
+	}
+
+	:global(body.dragging) .root-drop-zone {
+		display: block;
 	}
 </style>

@@ -197,6 +197,16 @@ pub fn change_folder_parent(folder_id: i32, new_parent_id: i32) -> Result<usize,
         .execute(connection)
 }
 
+pub fn remove_folder_parent(folder_id: i32) -> Result<usize, Error> {
+    use crate::schema::folders::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    diesel::update(folders.find(folder_id))
+        .set(parent_id.eq(None::<i32>))
+        .execute(connection)
+}
+
 pub fn change_bookmark_folder(bookmark_id: i32, new_folder_id: i32) -> Result<usize, Error> {
     use crate::schema::bookmarks::dsl::*;
 
@@ -204,6 +214,16 @@ pub fn change_bookmark_folder(bookmark_id: i32, new_folder_id: i32) -> Result<us
 
     diesel::update(bookmarks.find(bookmark_id))
         .set(folder_id.eq(new_folder_id))
+        .execute(connection)
+}
+
+pub fn remove_bookmark_folder(bookmark_id: i32) -> Result<usize, Error> {
+    use crate::schema::bookmarks::dsl::*;
+
+    let connection = &mut establish_connection();
+
+    diesel::update(bookmarks.find(bookmark_id))
+        .set(folder_id.eq(None::<i32>))
         .execute(connection)
 }
 

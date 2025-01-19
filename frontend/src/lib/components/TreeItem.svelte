@@ -29,6 +29,12 @@
 	// Drag handlers
 	function handleDragStart(e: DragEvent, type: 'folder' | 'bookmark', item: FolderNode | Bookmark) {
 		if (!e.dataTransfer) return;
+		if (
+			(type == 'folder' && (item as FolderNode).parent_id != null) ||
+			(type == 'bookmark' && (item as Bookmark).folder_id != null)
+		) {
+			document.body.classList.add('dragging');
+		}
 		e.dataTransfer.setData(
 			'application/json',
 			JSON.stringify({
@@ -84,6 +90,10 @@
 		}
 	}
 
+	function handleDragEnd() {
+		document.body.classList.remove('dragging');
+	}
+
 	// Context menu
 	function handleContextMenu(
 		event: MouseEvent,
@@ -120,6 +130,7 @@
 				ondragstart={(e) => handleDragStart(e, 'folder', item)}
 				ondragover={handleDragOver}
 				ondragleave={handleDragLeave}
+				ondragend={handleDragEnd}
 				ondrop={handleDrop}
 				oncontextmenu={(event) => handleContextMenu(event, 'folder', item)}
 				class="folder-summary"
@@ -142,6 +153,7 @@
 						class="bookmark-item"
 						draggable="true"
 						ondragstart={(e) => handleDragStart(e, 'bookmark', bookmark)}
+						ondragend={handleDragEnd}
 					>
 						<a
 							href={bookmark.url}
@@ -160,6 +172,7 @@
 		class="bookmark-root-item"
 		draggable="true"
 		ondragstart={(e) => handleDragStart(e, 'bookmark', item)}
+		ondragend={handleDragEnd}
 	>
 		<a
 			href={item.url}
