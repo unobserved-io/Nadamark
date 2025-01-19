@@ -106,3 +106,26 @@ pub struct UpdateBookmarkRequest {
     pub url: String,
     pub folder_id: Option<i32>,
 }
+
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::bookmarks)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct NewBookmark {
+    pub name: String,
+    pub url: String,
+    pub favicon: Option<String>,
+    pub favicon_url: Option<String>,
+    pub created: time::OffsetDateTime,
+    pub folder_id: Option<i32>,
+    pub favorite: bool,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = crate::schema::folders)]
+#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+pub struct NewFolder {
+    pub name: String,
+    pub created: time::OffsetDateTime,
+    pub parent_id: Option<i32>,
+    pub favorite: bool,
+}

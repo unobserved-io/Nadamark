@@ -1,4 +1,6 @@
-use crate::models::{Bookmark, Folder, UpdateBookmarkRequest, UpdateFolderRequest};
+use crate::models::{
+    Bookmark, Folder, NewBookmark, NewFolder, UpdateBookmarkRequest, UpdateFolderRequest,
+};
 use diesel::{
     dsl::not, prelude::*, result::Error, Connection, ExpressionMethods, SqliteConnection,
 };
@@ -58,11 +60,8 @@ pub fn create_new_folder(name: String, parent_id: Option<i32>) -> Result<usize, 
 
     let connection = &mut establish_connection();
 
-    let id = get_highest_folder_id()? + 1; // TODO: Insert without ID
-
     diesel::insert_into(folders::table)
-        .values(Folder {
-            id,
+        .values(NewFolder {
             name,
             created: time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
             parent_id,
@@ -80,11 +79,8 @@ pub fn create_new_bookmark(
 
     let connection = &mut establish_connection();
 
-    let id = get_highest_bookmark_id()? + 1; // TODO: Insert without ID
-
     diesel::insert_into(bookmarks::table)
-        .values(Bookmark {
-            id,
+        .values(NewBookmark {
             name,
             url,
             favicon: None,
