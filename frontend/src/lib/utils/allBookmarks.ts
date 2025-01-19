@@ -44,6 +44,5 @@ export function getAllFavorites(rootItems: RootItems): Bookmark[] {
 		collectFromFolder(rootFolder);
 	}
 
-	console.log(favorites);
 	return favorites;
 }

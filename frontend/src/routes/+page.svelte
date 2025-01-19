@@ -41,7 +41,8 @@
 	});
 
 	// Import Bookmarks
-	let fileInput: HTMLInputElement;
+	let htmlFileInput: HTMLInputElement;
+	let jsonFileInput: HTMLInputElement;
 	let status: string = '';
 	let isLoading: boolean = false;
 
@@ -49,21 +50,31 @@
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
 
-		if (!file || !file.name.endsWith('.html')) {
-			status = 'Please select a valid HTML bookmarks file';
+		if (!file || !(file.name.endsWith('.html') || file.name.endsWith('.json'))) {
+			status = 'Please select a valid bookmarks file';
 			return;
 		}
 
+		let api_url = '';
+		let content_type = '';
 		isLoading = true;
 		status = 'Reading file...';
 
 		try {
 			const fileContent = await file.text();
 
-			const response = await fetch('http://localhost:3096/api/import-html', {
+			if (file.name.endsWith('.html')) {
+				api_url = 'http://localhost:3096/api/import-html';
+				content_type = 'text/html';
+			} else if (file.name.endsWith('.json')) {
+				api_url = 'http://localhost:3096/api/import-linkwarden';
+				content_type = 'text/plain';
+			}
+
+			const response = await fetch(api_url, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'text/html'
+					'Content-Type': content_type
 				},
 				body: fileContent
 			});
@@ -81,7 +92,11 @@
 		} finally {
 			isLoading = false;
 			// Reset file input
-			fileInput.value = '';
+			if (file.name.endsWith('.html')) {
+				htmlFileInput.value = '';
+			} else {
+				jsonFileInput.value = '';
+			}
 			hamburgerMenuIsOpen = false;
 		}
 	}
@@ -135,19 +150,43 @@
 
 		{#if hamburgerMenuIsOpen}
 			<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
-				<label for="bookmarkHTMLUpload" class="dropdown-item">
-					<Icon icon="material-symbols:upload" />
-					Import
-				</label>
-				<input
-					id="bookmarkHTMLUpload"
-					bind:this={fileInput}
-					type="file"
-					accept=".html"
-					onchange={handleInputChange}
-					disabled={isLoading}
-					style="display:none"
-				/>
+				<div class="dropdown-item with-submenu">
+					<div class="item-content">
+						<Icon icon="material-symbols:upload" />
+						Import
+						<span class="submenu-arrow">
+							<Icon icon="material-symbols:chevron-right" />
+						</span>
+					</div>
+					<div class="submenu">
+						<label for="bookmarkHTMLUpload" class="dropdown-item">
+							<Icon icon="material-symbols:upload" />
+							Import HTML
+						</label>
+						<input
+							id="bookmarkHTMLUpload"
+							bind:this={htmlFileInput}
+							type="file"
+							accept=".html"
+							onchange={handleInputChange}
+							disabled={isLoading}
+							style="display:none"
+						/>
+						<label for="bookmarkLinkwardenUpload" class="dropdown-item">
+							<Icon icon="material-symbols:upload" />
+							Import Linkwarden JSON
+						</label>
+						<input
+							id="bookmarkLinkwardenUpload"
+							bind:this={jsonFileInput}
+							type="file"
+							accept=".json"
+							onchange={handleInputChange}
+							disabled={isLoading}
+							style="display:none"
+						/>
+					</div>
+				</div>
 				<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
 					<Icon icon="material-symbols:download" />
 					Export
@@ -236,6 +275,41 @@
 		text-decoration: none;
 		transition: background-color 0.2s;
 		cursor: pointer;
+	}
+
+	.dropdown-item:hover {
+		background-color: #f5f5f5;
+	}
+
+	.dropdown-item.with-submenu {
+		position: relative;
+	}
+
+	.item-content {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.submenu-arrow {
+		margin-left: auto;
+	}
+
+	.submenu {
+		position: absolute;
+		left: -230px;
+		top: 0;
+		background: white;
+		border: 1px solid #eee;
+		border-radius: 4px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		min-width: 180px;
+		display: none;
+	}
+
+	.dropdown-item.with-submenu:hover .submenu {
+		display: block;
 	}
 
 	.dropdown-item:hover {

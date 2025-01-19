@@ -1,16 +1,19 @@
+use std::collections::HashMap;
+
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
 use scraper::{ElementRef, Html, Selector};
-use time::OffsetDateTime;
+use serde_json::{self, Value};
+use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
 use crate::{
     database,
     models::{Bookmark, Folder},
 };
 
-pub async fn import_bookmarks(bookmarks_html: String) -> Response {
+pub async fn import_bookmarks_html(bookmarks_html: String) -> Response {
     match parse_bookmarks_html(&bookmarks_html) {
         Ok((folders_to_import, bookmarks_to_import)) => {
             if let Err(e) = database::insert_folders(folders_to_import) {
@@ -23,6 +26,30 @@ pub async fn import_bookmarks(bookmarks_html: String) -> Response {
         }
         Err(e) => {
             eprintln!("Error parsing bookmarks: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        }
+    }
+}
+
+pub async fn import_bookmarks_linkwarden(linkwarden_json: String) -> Response {
+    match serde_json::from_str(&linkwarden_json) {
+        Ok(json_values) => match parse_linkwarden_json(&json_values) {
+            Ok((folders_to_import, bookmarks_to_import)) => {
+                if let Err(e) = database::insert_folders(folders_to_import) {
+                    eprintln!("Failed to import folders: {}", e);
+                };
+                if let Err(e) = database::insert_bookmarks(bookmarks_to_import) {
+                    eprintln!("Failed to import bookmarks: {}", e);
+                };
+                StatusCode::OK.into_response()
+            }
+            Err(e) => {
+                eprintln!("Error parsing Linkwarden JSON: {}", e);
+                StatusCode::INTERNAL_SERVER_ERROR.into_response()
+            }
+        },
+        Err(e) => {
+            eprintln!("Error parsing Linkwarden JSON: {}", e);
             StatusCode::INTERNAL_SERVER_ERROR.into_response()
         }
     }
@@ -130,4 +157,91 @@ fn find_parent_folder<'a>(element: &ElementRef, folders: &'a [Folder]) -> Option
     }
 
     None
+}
+
+fn parse_linkwarden_json(json_data: &Value) -> Result<(Vec<Folder>, Vec<Bookmark>), String> {
+    let mut folders_to_import: Vec<Folder> = Vec::new();
+    let mut bookmarks_to_import: Vec<Bookmark> = Vec::new();
+
+    let mut bookmark_id_counter = database::get_highest_bookmark_id().unwrap_or(0) + 1;
+    let mut folder_id_counter = database::get_highest_folder_id().unwrap_or(0) + 1;
+
+    let mut folder_id_counterparts: HashMap<i32, i32> = HashMap::new();
+
+    if let Some(collections) = json_data["collections"].as_array() {
+        for collection in collections {
+            let folder_name = collection["name"].as_str().unwrap_or("");
+            let folder_id = match collection["id"].as_i64() {
+                Some(id) => id as i32,
+                None => 0,
+            };
+            let folder_parent_id = match collection["parentId"].as_i64() {
+                Some(id) => Some(id as i32),
+                None => None,
+            };
+            let folder_created = parse_created_date(collection["createdAt"].as_str());
+
+            folders_to_import.push(Folder {
+                id: folder_id_counter,
+                name: folder_name.to_string(),
+                created: folder_created,
+                parent_id: folder_parent_id,
+                favorite: false,
+            });
+
+            folder_id_counterparts.insert(folder_id, folder_id_counter);
+
+            if let Some(links) = collection["links"].as_array() {
+                for link in links {
+                    if let Some(bookmark_url) = link["url"].as_str() {
+                        let mut bookmark_name = link["name"].as_str().unwrap_or("Missing Name");
+                        if bookmark_name.trim().is_empty() {
+                            bookmark_name = "Missing Name";
+                        }
+                        let bookmark_created = parse_created_date(collection["createdAt"].as_str());
+
+                        bookmarks_to_import.push(Bookmark {
+                            id: bookmark_id_counter,
+                            name: bookmark_name.to_string(),
+                            url: bookmark_url.to_string(),
+                            favicon: None,
+                            favicon_url: None,
+                            created: bookmark_created,
+                            folder_id: Some(folder_id_counter),
+                            favorite: false,
+                        });
+
+                        bookmark_id_counter += 1;
+                    }
+                }
+            }
+
+            folder_id_counter += 1;
+        }
+    }
+
+    // Re-assign parent_id to proper Nadamark folder id
+    for folder in &mut folders_to_import {
+        if folder.parent_id.is_some() {
+            let new_parent_id = folder_id_counterparts
+                .get(&folder.parent_id.unwrap())
+                .copied();
+            folder.parent_id = new_parent_id;
+        }
+    }
+
+    Ok((folders_to_import, bookmarks_to_import))
+}
+
+fn parse_created_date(date_str: Option<&str>) -> OffsetDateTime {
+    match date_str {
+        Some(ds) => match OffsetDateTime::parse(ds, &Rfc3339) {
+            Ok(dt) => dt,
+            Err(e) => {
+                eprintln!("Error converting DateTime: {}", e);
+                time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc())
+            }
+        },
+        None => time::OffsetDateTime::now_local().unwrap_or(time::OffsetDateTime::now_utc()),
+    }
 }

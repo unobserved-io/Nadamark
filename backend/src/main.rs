@@ -9,6 +9,7 @@ mod schema;
 mod tree;
 
 use axum::{
+    extract::DefaultBodyLimit,
     http,
     routing::{get, post},
     Router,
@@ -22,7 +23,11 @@ async fn main() -> std::io::Result<()> {
     let router = Router::new()
         .route("/api/folder-tree", get(tree::refresh_tree))
         .route("/api/move", post(drag_drop::handle_move))
-        .route("/api/import-html", post(import::import_bookmarks))
+        .route("/api/import-html", post(import::import_bookmarks_html))
+        .route(
+            "/api/import-linkwarden",
+            post(import::import_bookmarks_linkwarden),
+        )
         .route("/api/export", get(export::export_bookmarks))
         .route("/api/create-folder", post(create::create_folder))
         .route("/api/create-bookmark", post(create::create_bookmark))
@@ -31,6 +36,8 @@ async fn main() -> std::io::Result<()> {
         .route("/api/update-bookmark", post(modify::update_bookmark))
         .route("/api/delete-folder", post(modify::delete_folder))
         .route("/api/delete-bookmark", post(modify::delete_bookmark))
+        // 20 MB File limit
+        .layer(DefaultBodyLimit::max(1024 * 1024 * 20))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
