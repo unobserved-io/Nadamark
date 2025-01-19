@@ -6,6 +6,8 @@
 	import { slide } from 'svelte/transition';
 	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
 	import FavoritesBar from '$lib/components/FavoritesBar.svelte';
+	import NewItemModal from '$lib/components/NewItemModal.svelte';
+	import { resetContextMenu } from '$lib/stores/contextMenuStore';
 
 	function handleKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
@@ -14,6 +16,7 @@
 				break;
 			case 'Escape':
 				showSearch = false;
+				showNewItemModal = false;
 				break;
 		}
 	}
@@ -156,13 +159,36 @@
 			console.error('Drop failed:', err);
 		}
 	}
+
+	// New Item
+	let showNewItemModal = $state(false);
+	let newItemModalType = $state('');
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
 
 <div class="top-nav">
-	<div class="nav-item"><Icon icon={'material-symbols-light:bookmark-add-sharp'} /></div>
-	<div class="nav-item"><Icon icon={'material-symbols-light:create-new-folder-sharp'} /></div>
+	<button
+		type="button"
+		class="nav-item"
+		onclick={() => {
+			resetContextMenu();
+			newItemModalType = 'bookmark';
+			showNewItemModal = true;
+		}}
+	>
+		<Icon icon={'material-symbols-light:bookmark-add-sharp'} />
+	</button>
+	<button
+		type="button"
+		class="nav-item"
+		onclick={() => {
+			resetContextMenu();
+			newItemModalType = 'folder';
+			showNewItemModal = true;
+		}}
+		><Icon icon={'material-symbols-light:create-new-folder-sharp'} />
+	</button>
 	<div class="nav-dropdown" bind:this={dropDownRef}>
 		<button
 			type="button"
@@ -272,6 +298,12 @@
 		a.rel = 'noreferrer';
 		a.click();
 	}}
+/>
+
+<NewItemModal
+	showModal={showNewItemModal}
+	type={newItemModalType}
+	close={() => (showNewItemModal = false)}
 />
 
 <style>

@@ -29,3 +29,7 @@ export function openContextMenu(
 		position
 	});
 }
+
+export function resetContextMenu() {
+	contextMenuStore.set(initialState);
+}
