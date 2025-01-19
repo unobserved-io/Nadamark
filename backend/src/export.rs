@@ -50,17 +50,22 @@ fn traverse_bookmarks(parent_folder_id: Option<i32>, html: &mut String, tabs: us
     }
 
     for bookmark in child_bookmarks {
-        // TODO: Add Icon base64
         let add_date = bookmark.created.unix_timestamp();
+        let icon = match bookmark.favicon {
+            Some(url) => &format!(" ICON=\"{}\"", url),
+            None => "",
+        };
         let icon_uri = match bookmark.favicon_url {
             Some(url) => &format!(" ICON_URI=\"{}\"", url),
             None => "",
         };
+
         html.push_str(&format!(
-            "{}<DT><A HREF=\"{}\" ADD_DATE=\"{}\"{}>{}</A>\n",
+            "{}<DT><A HREF=\"{}\" ADD_DATE=\"{}\"{}{}>{}</A>\n",
             tab_chars(further_tabs),
             bookmark.url,
             add_date,
+            icon,
             icon_uri,
             bookmark.name
         ));
