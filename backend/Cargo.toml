@@ -1,7 +1,11 @@
 [package]
-name = "backend"
-version = "0.1.0"
+name = "nadamark-backend"
+version = "25.1.0"
 edition = "2021"
+license = " AGPL-3.0-or-later"
+
+[profile.release]
+lto = true
 
 [dependencies]
 axum = "0.7"

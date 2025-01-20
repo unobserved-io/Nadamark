@@ -261,23 +261,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backend"
-version = "0.1.0"
-dependencies = [
- "axum",
- "diesel",
- "diesel_migrations",
- "directories",
- "rfd",
- "scraper",
- "serde",
- "serde_json",
- "time",
- "tokio",
- "tower-http",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1250,6 +1233,23 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "nadamark-backend"
+version = "25.1.0"
+dependencies = [
+ "axum",
+ "diesel",
+ "diesel_migrations",
+ "directories",
+ "rfd",
+ "scraper",
+ "serde",
+ "serde_json",
+ "time",
+ "tokio",
+ "tower-http",
 ]
 
 [[package]]
