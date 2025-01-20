@@ -32,7 +32,7 @@
 	async function toggleFavorite() {
 		$contextMenuStore.isOpen = false;
 		try {
-			const response = await fetch('http://localhost:3096/api/favorite-bookmark', {
+			const response = await fetch('/api/favorite-bookmark', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -56,9 +56,9 @@
 		let apiUrl: string = '';
 		try {
 			if (type == 'folder') {
-				apiUrl = 'http://localhost:3096/api/delete-folder';
+				apiUrl = '/api/delete-folder';
 			} else if (type == 'bookmark') {
-				apiUrl = 'http://localhost:3096/api/delete-bookmark';
+				apiUrl = '/api/delete-bookmark';
 			}
 			const response = await fetch(apiUrl, {
 				method: 'POST',

@@ -67,7 +67,7 @@
 		try {
 			const data = JSON.parse(e.dataTransfer.getData('application/json'));
 
-			const response = await fetch('http://localhost:3096/api/move', {
+			const response = await fetch('/api/move', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

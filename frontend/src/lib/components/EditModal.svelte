@@ -40,7 +40,7 @@
 		try {
 			if (type == 'folder') {
 				if (itemName.trim().length > 0) {
-					const response = await fetch('http://localhost:3096/api/update-folder', {
+					const response = await fetch('/api/update-folder', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
@@ -60,7 +60,7 @@
 				}
 			} else if (type == 'bookmark') {
 				if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-					const response = await fetch('http://localhost:3096/api/update-bookmark', {
+					const response = await fetch('/api/update-bookmark', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'

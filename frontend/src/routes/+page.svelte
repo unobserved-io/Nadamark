@@ -65,10 +65,10 @@
 			const fileContent = await file.text();
 
 			if (file.name.endsWith('.html')) {
-				api_url = 'http://localhost:3096/api/import-html';
+				api_url = '/api/import-html';
 				content_type = 'text/html';
 			} else if (file.name.endsWith('.json')) {
-				api_url = 'http://localhost:3096/api/import-linkwarden';
+				api_url = '/api/import-linkwarden';
 				content_type = 'text/plain';
 			}
 
@@ -99,7 +99,7 @@
 
 	// Export bookmarks
 	async function exportBookmarksAsHtml() {
-		const response = await fetch('http://localhost:3096/api/export');
+		const response = await fetch('/api/export');
 		const bookmarksHtml = await response.text();
 		if (bookmarksHtml.trim().length > 0) {
 			downloadHtml(bookmarksHtml);
@@ -135,7 +135,7 @@
 		try {
 			const data = JSON.parse(e.dataTransfer.getData('application/json'));
 
-			const response = await fetch('http://localhost:3096/api/move-to-root', {
+			const response = await fetch('/api/move-to-root', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

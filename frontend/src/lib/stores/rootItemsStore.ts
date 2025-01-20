@@ -15,7 +15,7 @@ export const rootItemsStore = writable<RootItemsState>(initialState);
 
 export async function refreshTree() {
 	try {
-		const response = await fetch('http://localhost:3096/api/folder-tree');
+		const response = await fetch('/api/tree');
 		const data = await response.json();
 		rootItemsStore.set({ data, loading: false });
 	} catch (error) {

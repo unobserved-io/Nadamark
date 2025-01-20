@@ -32,7 +32,7 @@
 		try {
 			if (type == 'folder') {
 				if (itemName.trim().length > 0) {
-					const response = await fetch('http://localhost:3096/api/create-folder', {
+					const response = await fetch('/api/create-folder', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
@@ -51,7 +51,7 @@
 				}
 			} else if (type == 'bookmark') {
 				if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-					const response = await fetch('http://localhost:3096/api/create-bookmark', {
+					const response = await fetch('/api/create-bookmark', {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json'
