@@ -202,7 +202,7 @@
 				aria-expanded={hamburgerMenuIsOpen}
 				aria-label="Menu"
 			>
-				<Icon icon={'pepicons-pencil:hamburger'} />
+				<Icon icon={'game-icons:hamburger-menu'} />
 			</button>
 
 			{#if hamburgerMenuIsOpen}
