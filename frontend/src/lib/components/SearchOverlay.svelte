@@ -25,7 +25,9 @@
 
 	$effect(() => {
 		if (isOpen) {
-			allBookmarks = getAllBookmarks($rootItemsStore);
+			if ($rootItemsStore.data && !$rootItemsStore.loading) {
+				allBookmarks = getAllBookmarks($rootItemsStore.data);
+			}
 			tick().then(() => {
 				setTimeout(() => {
 					searchInput?.focus();
