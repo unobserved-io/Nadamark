@@ -21,7 +21,9 @@
 
 	$effect(() => {
 		if (showModal) {
-			allFolders = getAllFolders($rootItemsStore);
+			if ($rootItemsStore.data && !$rootItemsStore.loading) {
+				allFolders = getAllFolders($rootItemsStore.data);
+			}
 			selectedFolder = $contextMenuStore.data?.id;
 		}
 	});

@@ -8,7 +8,9 @@
 	let allFavorites: Bookmark[] = $state([]);
 
 	$effect(() => {
-		allFavorites = getAllFavorites($rootItemsStore);
+		if ($rootItemsStore.data && !$rootItemsStore.loading) {
+			allFavorites = getAllFavorites($rootItemsStore.data);
+		}
 	});
 
 	// Context menu

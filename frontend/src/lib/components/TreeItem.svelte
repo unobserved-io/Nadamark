@@ -5,7 +5,6 @@
 	import Self from './TreeItem.svelte';
 	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
 	import { refreshTree } from '$lib/stores/rootItemsStore';
-	import ContextMenu from './ContextMenu.svelte';
 
 	let { item, type } = $props<{
 		item: FolderNode | Bookmark;
@@ -183,8 +182,6 @@
 		</a>
 	</li>
 {/if}
-
-<ContextMenu />
 
 <style>
 	.tree-item {

@@ -1,14 +1,25 @@
 import { writable } from 'svelte/store';
 import type { RootItems } from '$lib/types';
 
-const initialState: RootItems = {
-	root_folders: [],
-	root_bookmarks: []
+type RootItemsState = {
+	data: RootItems | null;
+	loading: boolean;
 };
 
-export const rootItemsStore = writable<RootItems>(initialState);
+const initialState: RootItemsState = {
+	data: null,
+	loading: true
+};
+
+export const rootItemsStore = writable<RootItemsState>(initialState);
 
 export async function refreshTree() {
-	const treeResult = await fetch('http://localhost:3096/api/folder-tree');
-	rootItemsStore.set(await treeResult.json());
+	try {
+		const response = await fetch('http://localhost:3096/api/folder-tree');
+		const data = await response.json();
+		rootItemsStore.set({ data, loading: false });
+	} catch (error) {
+		console.error('Error fetching tree:', error);
+		rootItemsStore.set({ data: null, loading: false });
+	}
 }

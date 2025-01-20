@@ -8,6 +8,9 @@
 	import FavoritesBar from '$lib/components/FavoritesBar.svelte';
 	import NewItemModal from '$lib/components/NewItemModal.svelte';
 	import { resetContextMenu } from '$lib/stores/contextMenuStore';
+	import ContextMenu from '$lib/components/ContextMenu.svelte';
+
+	let rootItems = $derived($rootItemsStore);
 
 	function handleKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
@@ -23,7 +26,7 @@
 
 	// Drop-down hamburger menu
 	let hamburgerMenuIsOpen = $state(false);
-	let dropDownRef: HTMLDivElement;
+	let dropDownRef = $state<HTMLDivElement>();
 
 	function handleClickOutside(event: MouseEvent) {
 		if (dropDownRef && !dropDownRef.contains(event.target as Node)) {
@@ -44,22 +47,19 @@
 	});
 
 	// Import Bookmarks
-	let status: string = $state('');
-	let isLoading: boolean = $state(false);
+	let isLoading = $state(false);
 
 	async function handleFileSelect(event: Event): Promise<void> {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
 
 		if (!file || !(file.name.endsWith('.html') || file.name.endsWith('.json'))) {
-			status = 'Please select a valid bookmarks file';
 			return;
 		}
 
 		let api_url = '';
 		let content_type = '';
 		isLoading = true;
-		status = 'Reading file...';
 
 		try {
 			const fileContent = await file.text();
@@ -84,12 +84,9 @@
 				throw new Error(`HTTP error! status: ${response.status}`);
 			} else {
 				refreshTree();
-				// TODO: Have this be a pop-up at the bottom of the page to show success or failure
-				status = `Successfully imported bookmarks`;
 			}
 		} catch (error) {
 			console.error('Error importing bookmarks:', error);
-			status = `Error importing bookmarks: ${error instanceof Error ? error.message : 'Unknown error'}`;
 		} finally {
 			isLoading = false;
 			hamburgerMenuIsOpen = false;
@@ -167,144 +164,148 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-<div class="top-nav">
-	<button
-		type="button"
-		class="nav-item"
-		onclick={() => {
-			resetContextMenu();
-			newItemModalType = 'bookmark';
-			showNewItemModal = true;
-		}}
-	>
-		<Icon icon={'material-symbols-light:bookmark-add-sharp'} />
-	</button>
-	<button
-		type="button"
-		class="nav-item"
-		onclick={() => {
-			resetContextMenu();
-			newItemModalType = 'folder';
-			showNewItemModal = true;
-		}}
-		><Icon icon={'material-symbols-light:create-new-folder-sharp'} />
-	</button>
-	<div class="nav-dropdown" bind:this={dropDownRef}>
+{#if !$rootItemsStore.loading && $rootItemsStore.data}
+	<div class="top-nav">
 		<button
 			type="button"
 			class="nav-item"
-			onclick={toggleDropDown}
-			aria-expanded={hamburgerMenuIsOpen}
-			aria-label="Menu"
+			onclick={() => {
+				resetContextMenu();
+				newItemModalType = 'bookmark';
+				showNewItemModal = true;
+			}}
 		>
-			<Icon icon={'pepicons-pencil:hamburger'} />
+			<Icon icon={'material-symbols-light:bookmark-add-sharp'} />
 		</button>
+		<button
+			type="button"
+			class="nav-item"
+			onclick={() => {
+				resetContextMenu();
+				newItemModalType = 'folder';
+				showNewItemModal = true;
+			}}
+			><Icon icon={'material-symbols-light:create-new-folder-sharp'} />
+		</button>
+		<div class="nav-dropdown" bind:this={dropDownRef}>
+			<button
+				type="button"
+				class="nav-item"
+				onclick={toggleDropDown}
+				aria-expanded={hamburgerMenuIsOpen}
+				aria-label="Menu"
+			>
+				<Icon icon={'pepicons-pencil:hamburger'} />
+			</button>
 
-		{#if hamburgerMenuIsOpen}
-			<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
-				<div class="dropdown-item with-submenu">
-					<div class="item-content">
-						<Icon icon="material-symbols:upload" />
-						Import
-						<span class="submenu-arrow">
-							<Icon icon="material-symbols:chevron-right" />
-						</span>
-					</div>
-					<div class="submenu">
-						<label for="bookmarkHTMLUpload" class="dropdown-item">
+			{#if hamburgerMenuIsOpen}
+				<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
+					<div class="dropdown-item with-submenu">
+						<div class="item-content">
 							<Icon icon="material-symbols:upload" />
-							Import HTML
-						</label>
-						<input
-							id="bookmarkHTMLUpload"
-							type="file"
-							accept=".html"
-							onchange={handleInputChange}
-							disabled={isLoading}
-							style="display:none"
-						/>
-						<label for="bookmarkLinkwardenUpload" class="dropdown-item">
-							<Icon icon="material-symbols:upload" />
-							Import Linkwarden JSON
-						</label>
-						<input
-							id="bookmarkLinkwardenUpload"
-							type="file"
-							accept=".json"
-							onchange={handleInputChange}
-							disabled={isLoading}
-							style="display:none"
-						/>
+							Import
+							<span class="submenu-arrow">
+								<Icon icon="material-symbols:chevron-right" />
+							</span>
+						</div>
+						<div class="submenu">
+							<label for="bookmarkHTMLUpload" class="dropdown-item">
+								<Icon icon="material-symbols:upload" />
+								Import HTML
+							</label>
+							<input
+								id="bookmarkHTMLUpload"
+								type="file"
+								accept=".html"
+								onchange={handleInputChange}
+								disabled={isLoading}
+								style="display:none"
+							/>
+							<label for="bookmarkLinkwardenUpload" class="dropdown-item">
+								<Icon icon="material-symbols:upload" />
+								Import Linkwarden JSON
+							</label>
+							<input
+								id="bookmarkLinkwardenUpload"
+								type="file"
+								accept=".json"
+								onchange={handleInputChange}
+								disabled={isLoading}
+								style="display:none"
+							/>
+						</div>
 					</div>
+					<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
+						<Icon icon="material-symbols:download" />
+						Export
+					</button>
 				</div>
-				<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
-					<Icon icon="material-symbols:download" />
-					Export
-				</button>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
-</div>
 
-<FavoritesBar />
+	<FavoritesBar />
 
-<div
-	class="root-drop-zone top"
-	class:drag-active={isDragging}
-	ondragover={(e) => e.preventDefault()}
-	ondragenter={() => (isDragging = true)}
-	ondragleave={() => (isDragging = false)}
-	ondrop={handleRootDrop}
-	role="region"
-	aria-label="Drop zone for root level items"
->
-	Drop here to un-nest
-</div>
+	<div
+		class="root-drop-zone top"
+		class:drag-active={isDragging}
+		ondragover={(e) => e.preventDefault()}
+		ondragenter={() => (isDragging = true)}
+		ondragleave={() => (isDragging = false)}
+		ondrop={handleRootDrop}
+		role="region"
+		aria-label="Drop zone for root level items"
+	>
+		Drop here to un-nest
+	</div>
 
-<div class="tree-view">
-	<ul>
-		{#each $rootItemsStore.root_folders as folder}
-			<li>
-				<TreeItem item={folder} type="folder" />
-			</li>
-		{/each}
-		{#each $rootItemsStore.root_bookmarks as bookmark}
-			<TreeItem item={bookmark} type="bookmark" />
-		{/each}
-	</ul>
-</div>
+	<div class="tree-view">
+		<ul>
+			{#each rootItems.data?.root_folders ?? [] as folder}
+				<li>
+					<TreeItem item={folder} type="folder" />
+				</li>
+			{/each}
+			{#each rootItems.data?.root_bookmarks ?? [] as bookmark}
+				<TreeItem item={bookmark} type="bookmark" />
+			{/each}
+		</ul>
+	</div>
 
-<div
-	class="root-drop-zone bottom"
-	class:drag-active={isDragging}
-	ondragover={(e) => e.preventDefault()}
-	ondragenter={() => (isDragging = true)}
-	ondragleave={() => (isDragging = false)}
-	ondrop={handleRootDrop}
-	role="region"
-	aria-label="Drop zone for root level items"
->
-	Drop here to un-nest
-</div>
+	<div
+		class="root-drop-zone bottom"
+		class:drag-active={isDragging}
+		ondragover={(e) => e.preventDefault()}
+		ondragenter={() => (isDragging = true)}
+		ondragleave={() => (isDragging = false)}
+		ondrop={handleRootDrop}
+		role="region"
+		aria-label="Drop zone for root level items"
+	>
+		Drop here to un-nest
+	</div>
 
-<SearchOverlay
-	isOpen={showSearch}
-	close={() => (showSearch = false)}
-	select={(bookmark) => {
-		showSearch = false;
-		const a = document.createElement('a');
-		a.href = bookmark.url;
-		a.target = '_blank';
-		a.rel = 'noreferrer';
-		a.click();
-	}}
-/>
+	<ContextMenu {showNewItemModal} {newItemModalType} />
 
-<NewItemModal
-	showModal={showNewItemModal}
-	type={newItemModalType}
-	close={() => (showNewItemModal = false)}
-/>
+	<SearchOverlay
+		isOpen={showSearch}
+		close={() => (showSearch = false)}
+		select={(bookmark) => {
+			showSearch = false;
+			const a = document.createElement('a');
+			a.href = bookmark.url;
+			a.target = '_blank';
+			a.rel = 'noreferrer';
+			a.click();
+		}}
+	/>
+
+	<NewItemModal
+		showModal={showNewItemModal}
+		type={newItemModalType}
+		close={() => (showNewItemModal = false)}
+	/>
+{/if}
 
 <style>
 	.top-nav {

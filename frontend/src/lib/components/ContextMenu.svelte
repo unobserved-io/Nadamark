@@ -5,9 +5,14 @@
 	import EditModal from './EditModal.svelte';
 	import NewItemModal from './NewItemModal.svelte';
 
+	let { showNewItemModal, newItemModalType } = $props<{
+		showNewItemModal: boolean;
+		newItemModalType: string;
+	}>();
+
 	// New Item Modal
-	let newItemModalType = $state('');
-	let showNewItemModal = $state(false);
+	// let newItemModalType = $state('');
+	// let showNewItemModal = $state(false);
 
 	function handleShowNewItemModal(type: string) {
 		newItemModalType = type;
