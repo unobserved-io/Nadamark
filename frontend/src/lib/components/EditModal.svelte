@@ -18,11 +18,14 @@
 	let selectedFolder: number | null = $state(null);
 	let itemName: string = $state('');
 	let itemUrl = $state('');
+	let errorMsg: string | null = $state(null);
 
 	$effect(() => {
 		if (showModal) {
 			if ($contextMenuStore.data) {
-				allFolders = getAllFolders($rootItemsStore);
+				if ($rootItemsStore.data && !$rootItemsStore.loading) {
+					allFolders = getAllFolders($rootItemsStore.data);
+				}
 
 				itemName = $contextMenuStore.data.name;
 
@@ -37,52 +40,69 @@
 	});
 
 	async function handleSave() {
-		try {
-			if (type == 'folder') {
-				if (itemName.trim().length > 0) {
-					const response = await fetch('/api/update-folder', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
-							id: $contextMenuStore.data?.id,
-							name: itemName,
-							parent_id: selectedFolder
-						})
-					});
+		if ((type == 'folder' || validateUrl(itemUrl)) && itemName.length > 0) {
+			try {
+				if (type == 'folder') {
+					if (itemName.trim().length > 0) {
+						const response = await fetch('/api/update-folder', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								id: $contextMenuStore.data?.id,
+								name: itemName,
+								parent_id: selectedFolder
+							})
+						});
 
-					if (!response.ok) {
-						throw new Error('Failed to update folder');
+						if (!response.ok) {
+							throw new Error('Failed to update folder');
+						}
+						refreshTree();
+						closeModal();
 					}
-					refreshTree();
-					closeModal();
-				}
-			} else if (type == 'bookmark') {
-				if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-					const response = await fetch('/api/update-bookmark', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({
-							id: $contextMenuStore.data?.id,
-							name: itemName,
-							url: itemUrl,
-							folder_id: selectedFolder
-						})
-					});
+				} else if (type == 'bookmark') {
+					if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
+						const response = await fetch('/api/update-bookmark', {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+								id: $contextMenuStore.data?.id,
+								name: itemName,
+								url: itemUrl,
+								folder_id: selectedFolder
+							})
+						});
 
-					if (!response.ok) {
-						throw new Error('Failed to update bookmark');
+						if (!response.ok) {
+							throw new Error('Failed to update bookmark');
+						}
+						refreshTree();
+						closeModal();
 					}
-					refreshTree();
-					closeModal();
 				}
+			} catch (err) {
+				console.error('Edit failed:', err);
+				closeModal();
 			}
-		} catch (err) {
-			console.error('Edit failed:', err);
-			closeModal();
+		} else {
+			if (itemName.length <= 0) {
+				errorMsg = 'Please give it a name.';
+			} else if (!validateUrl(itemUrl)) {
+				errorMsg = 'Please enter a valid URL.';
+			}
+		}
+	}
+
+	function validateUrl(url: string) {
+		try {
+			new URL(url);
+			return true;
+		} catch {
+			return false;
 		}
 	}
 
@@ -96,8 +116,10 @@
 
 	function closeModal() {
 		itemName = '';
+		itemUrl = '';
 		allFolders = [];
 		selectedFolder = null;
+		errorMsg = null;
 		close();
 	}
 </script>
@@ -110,10 +132,23 @@
 			<button class="close" onclick={closeModal}>&times;</button>
 			{#if type == 'folder'}
 				<h1>Edit {$contextMenuStore.data?.name}</h1>
+				{#if errorMsg}
+					<div class="error-message">
+						<span>{errorMsg}</span>
+					</div>
+				{/if}
 				<form>
 					<div class="form-group">
 						<label for="name">Name</label>
-						<input type="text" name="name" required bind:value={itemName} />
+						<input
+							type="text"
+							name="name"
+							autocomplete="off"
+							data-1p-ignore
+							data-lpignore="true"
+							data-protonpass-ignore="true"
+							bind:value={itemName}
+						/>
 					</div>
 
 					<div class="form-group">
@@ -132,15 +167,36 @@
 				</form>
 			{:else if type == 'bookmark'}
 				<h1>Edit {$contextMenuStore.data?.name}</h1>
+				{#if errorMsg}
+					<div class="error-message">
+						<span>{errorMsg}</span>
+					</div>
+				{/if}
 				<form>
 					<div class="form-group">
 						<label for="name">Name</label>
-						<input type="text" name="name" required bind:value={itemName} />
+						<input
+							type="text"
+							name="name"
+							autocomplete="off"
+							data-1p-ignore
+							data-lpignore="true"
+							data-protonpass-ignore="true"
+							bind:value={itemName}
+						/>
 					</div>
 
 					<div class="form-group">
 						<label for="url">URL</label>
-						<input type="url" name="url" required bind:value={itemUrl} />
+						<input
+							type="text"
+							name="url"
+							autocomplete="off"
+							data-1p-ignore
+							data-lpignore="true"
+							data-protonpass-ignore="true"
+							bind:value={itemUrl}
+						/>
 					</div>
 
 					<div class="form-group">
@@ -239,5 +295,14 @@
 
 	.save:hover {
 		background: rgba(0, 0, 0, 0.7);
+	}
+
+	.error-message {
+		background-color: #f8d7da;
+		border: 1px solid #f5c6cb;
+		color: #721c24;
+		padding: 0.75rem;
+		border-radius: 4px;
+		margin-bottom: 1rem;
 	}
 </style>

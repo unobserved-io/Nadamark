@@ -5,23 +5,22 @@
 	import EditModal from './EditModal.svelte';
 	import NewItemModal from './NewItemModal.svelte';
 
-	let { showNewItemModal, newItemModalType } = $props<{
+	let {
+		showNewItemModal = $bindable(),
+		newItemModalType = $bindable(),
+		showEditModal = $bindable(),
+		editModalType = $bindable()
+	} = $props<{
 		showNewItemModal: boolean;
 		newItemModalType: string;
+		showEditModal: boolean;
+		editModalType: string;
 	}>();
-
-	// New Item Modal
-	// let newItemModalType = $state('');
-	// let showNewItemModal = $state(false);
 
 	function handleShowNewItemModal(type: string) {
 		newItemModalType = type;
 		showNewItemModal = true;
 	}
-
-	// Edit Modal
-	let editModalType = $state('');
-	let showEditModal = $state(false);
 
 	function handleShowEditModal(type: string) {
 		editModalType = type;
@@ -117,14 +116,6 @@
 		</div>
 	</nav>
 {/if}
-
-<NewItemModal
-	showModal={showNewItemModal}
-	type={newItemModalType}
-	close={() => (showNewItemModal = false)}
-/>
-
-<EditModal showModal={showEditModal} type={editModalType} close={() => (showEditModal = false)} />
 
 <style>
 	.context-menu {

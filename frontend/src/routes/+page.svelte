@@ -9,13 +9,16 @@
 	import NewItemModal from '$lib/components/NewItemModal.svelte';
 	import { resetContextMenu } from '$lib/stores/contextMenuStore';
 	import ContextMenu from '$lib/components/ContextMenu.svelte';
+	import EditModal from '$lib/components/EditModal.svelte';
 
 	let rootItems = $derived($rootItemsStore);
 
 	function handleKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
 			case 'f':
-				showSearch = true;
+				if (!showNewItemModal && !showEditModal) {
+					showSearch = true;
+				}
 				break;
 			case 'Escape':
 				showSearch = false;
@@ -160,6 +163,10 @@
 	// New Item
 	let showNewItemModal = $state(false);
 	let newItemModalType = $state('');
+
+	// Edit Item
+	let showEditModal = $state(false);
+	let editModalType = $state('');
 </script>
 
 <svelte:window onkeydown={handleKeyDown} />
@@ -285,7 +292,7 @@
 		Drop here to un-nest
 	</div>
 
-	<ContextMenu {showNewItemModal} {newItemModalType} />
+	<ContextMenu bind:showNewItemModal bind:newItemModalType bind:showEditModal bind:editModalType />
 
 	<SearchOverlay
 		isOpen={showSearch}
@@ -305,6 +312,8 @@
 		type={newItemModalType}
 		close={() => (showNewItemModal = false)}
 	/>
+
+	<EditModal showModal={showEditModal} type={editModalType} close={() => (showEditModal = false)} />
 {/if}
 
 <style>
