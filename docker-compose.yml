@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   app:
-    image: ghcr.io/unobserved-io/furtherance-sync:latest
+    image: ghcr.io/unobserved-io/nadamark:latest
     ports:
       - "8663:8663"
     restart: unless-stopped
