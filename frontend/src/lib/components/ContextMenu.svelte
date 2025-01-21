@@ -2,8 +2,7 @@
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
 	import { refreshTree } from '$lib/stores/rootItemsStore';
 	import type { Bookmark } from '$lib/types';
-	import EditModal from './EditModal.svelte';
-	import NewItemModal from './NewItemModal.svelte';
+	import { dev } from '$app/environment';
 
 	let {
 		showNewItemModal = $bindable(),
@@ -31,13 +30,16 @@
 	async function toggleFavorite() {
 		$contextMenuStore.isOpen = false;
 		try {
-			const response = await fetch('/api/favorite-bookmark', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify($contextMenuStore.data?.id)
-			});
+			const response = await fetch(
+				dev ? 'http://localhost:8663/api/favorite-bookmark' : '/api/favorite-bookmark',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify($contextMenuStore.data?.id)
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
@@ -55,9 +57,9 @@
 		let apiUrl: string = '';
 		try {
 			if (type == 'folder') {
-				apiUrl = '/api/delete-folder';
+				apiUrl = dev ? 'http://localhost:8663/api/delete-folder' : '/api/delete-folder';
 			} else if (type == 'bookmark') {
-				apiUrl = '/api/delete-bookmark';
+				apiUrl = dev ? 'http://localhost:8663/api/delete-bookmark' : '/api/delete-bookmark';
 			}
 			const response = await fetch(apiUrl, {
 				method: 'POST',

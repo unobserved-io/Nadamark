@@ -5,6 +5,7 @@
 	import Self from './TreeItem.svelte';
 	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
 	import { refreshTree } from '$lib/stores/rootItemsStore';
+	import { dev } from '$app/environment';
 
 	let { item, type } = $props<{
 		item: FolderNode | Bookmark;
@@ -67,7 +68,7 @@
 		try {
 			const data = JSON.parse(e.dataTransfer.getData('application/json'));
 
-			const response = await fetch('/api/move', {
+			const response = await fetch(dev ? 'http://localhost:8663/api/move' : '/api/move', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

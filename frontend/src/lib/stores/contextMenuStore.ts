@@ -26,7 +26,10 @@ export function openContextMenu(
 		isOpen: true,
 		type,
 		data,
-		position
+		position: {
+			x: position.x + window.scrollX,
+			y: position.y + window.scrollY
+		}
 	});
 }
 

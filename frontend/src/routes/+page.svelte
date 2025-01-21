@@ -10,6 +10,7 @@
 	import { resetContextMenu } from '$lib/stores/contextMenuStore';
 	import ContextMenu from '$lib/components/ContextMenu.svelte';
 	import EditModal from '$lib/components/EditModal.svelte';
+	import { dev } from '$app/environment';
 
 	let rootItems = $derived($rootItemsStore);
 
@@ -68,10 +69,10 @@
 			const fileContent = await file.text();
 
 			if (file.name.endsWith('.html')) {
-				api_url = '/api/import-html';
+				api_url = dev ? 'http://localhost:8663/api/import-html' : '/api/import-html';
 				content_type = 'text/html';
 			} else if (file.name.endsWith('.json')) {
-				api_url = '/api/import-linkwarden';
+				api_url = dev ? 'http://localhost:8663/api/import-linkwarden' : '/api/import-linkwarden';
 				content_type = 'text/plain';
 			}
 
@@ -102,7 +103,7 @@
 
 	// Export bookmarks
 	async function exportBookmarksAsHtml() {
-		const response = await fetch('/api/export');
+		const response = await fetch(dev ? 'http://localhost:8663/api/export' : '/api/export');
 		const bookmarksHtml = await response.text();
 		if (bookmarksHtml.trim().length > 0) {
 			downloadHtml(bookmarksHtml);
@@ -138,17 +139,20 @@
 		try {
 			const data = JSON.parse(e.dataTransfer.getData('application/json'));
 
-			const response = await fetch('/api/move-to-root', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					item_type: data.type,
-					item_id: data.id,
-					target_folder_id: 0
-				})
-			});
+			const response = await fetch(
+				dev ? 'http://localhost:8663/api/move-to-root' : '/api/move-to-root',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						item_type: data.type,
+						item_id: data.id,
+						target_folder_id: 0
+					})
+				}
+			);
 
 			if (!response.ok) {
 				throw new Error('Failed to move item to root');

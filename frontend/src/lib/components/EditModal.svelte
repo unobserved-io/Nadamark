@@ -3,6 +3,7 @@
 	import { getAllFolders } from '$lib/utils/allFolders';
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
 	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
+	import { dev } from '$app/environment';
 
 	let {
 		showModal = false,
@@ -44,17 +45,20 @@
 			try {
 				if (type == 'folder') {
 					if (itemName.trim().length > 0) {
-						const response = await fetch('/api/update-folder', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-								id: $contextMenuStore.data?.id,
-								name: itemName,
-								parent_id: selectedFolder
-							})
-						});
+						const response = await fetch(
+							dev ? 'http://localhost:8663/api/update-folder' : '/api/update-folder',
+							{
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									id: $contextMenuStore.data?.id,
+									name: itemName,
+									parent_id: selectedFolder
+								})
+							}
+						);
 
 						if (!response.ok) {
 							throw new Error('Failed to update folder');
@@ -64,18 +68,21 @@
 					}
 				} else if (type == 'bookmark') {
 					if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-						const response = await fetch('/api/update-bookmark', {
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-								id: $contextMenuStore.data?.id,
-								name: itemName,
-								url: itemUrl,
-								folder_id: selectedFolder
-							})
-						});
+						const response = await fetch(
+							dev ? 'http://localhost:8663/api/update-bookmark' : '/api/update-bookmark',
+							{
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json'
+								},
+								body: JSON.stringify({
+									id: $contextMenuStore.data?.id,
+									name: itemName,
+									url: itemUrl,
+									folder_id: selectedFolder
+								})
+							}
+						);
 
 						if (!response.ok) {
 							throw new Error('Failed to update bookmark');
