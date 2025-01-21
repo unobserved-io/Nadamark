@@ -25,7 +25,9 @@ COPY --from=backend-builder /usr/src/nadamark/backend/target/release/nadamark ./
 
 # Create a non-root user
 RUN useradd -r -s /bin/false nadamark && \
-    chown -R nadamark:nadamark /usr/local/bin/nadamark
+    chown -R nadamark:nadamark /usr/local/bin/nadamark && \
+    mkdir -p /bookmarks && \
+    chown -R nadamark:nadamark /bookmarks
 
 USER nadamark
 

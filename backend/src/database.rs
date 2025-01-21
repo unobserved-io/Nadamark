@@ -11,13 +11,33 @@ use std::path::PathBuf;
 
 const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
+fn running_in_container() -> bool {
+    // Check for .dockerenv file (Docker)
+    if std::path::Path::new("/.dockerenv").exists() {
+        return true;
+    }
+
+    // Check cgroup (works for Docker, Podman, and other containers)
+    if let Ok(contents) = std::fs::read_to_string("/proc/1/cgroup") {
+        if !contents.lines().all(|line| line.contains(":/")) {
+            return true;
+        }
+    }
+
+    false
+}
+
 pub fn get_data_path() -> PathBuf {
-    if let Some(project_dir) = ProjectDirs::from("io", "unobserved", "nadamark") {
-        let path = PathBuf::from(project_dir.data_dir());
-        fs::create_dir_all(&path).expect("Unable to create data directory");
-        path
+    if running_in_container() {
+        PathBuf::from("/bookmarks")
     } else {
-        PathBuf::new()
+        if let Some(project_dir) = ProjectDirs::from("io", "unobserved", "nadamark") {
+            let path = PathBuf::from(project_dir.data_dir());
+            fs::create_dir_all(&path).expect("Unable to create data directory");
+            path
+        } else {
+            PathBuf::new()
+        }
     }
 }
 
