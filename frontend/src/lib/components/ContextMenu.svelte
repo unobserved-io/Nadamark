@@ -78,12 +78,29 @@
 			console.error('Error deleting item:', error);
 		}
 	}
+
+	// Open menu 'up' if it goes past the bottom of the page
+	let menuElement = $state<HTMLElement>();
+	let adjustedY = $state($contextMenuStore.position.y);
+
+	$effect(() => {
+		if (menuElement && $contextMenuStore.isOpen) {
+			const menuHeight = menuElement.offsetHeight;
+			const viewportHeight = window.innerHeight;
+			const scrollY = window.scrollY;
+			const wouldOverflow = $contextMenuStore.position.y + menuHeight > viewportHeight + scrollY;
+
+			adjustedY = wouldOverflow
+				? $contextMenuStore.position.y - menuHeight
+				: $contextMenuStore.position.y;
+		}
+	});
 </script>
 
 {#if $contextMenuStore.isOpen}
 	<nav
-		style="position: fixed; top: {$contextMenuStore.position.y}px; left: {$contextMenuStore.position
-			.x}px"
+		bind:this={menuElement}
+		style="position: absolute; top: {adjustedY}px; left: {$contextMenuStore.position.x}px"
 		class="context-menu"
 	>
 		<div>
