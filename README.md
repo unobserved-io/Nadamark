@@ -18,13 +18,19 @@ What more could you want?
 
 The easiest way to install Nadamark is with Docker. Download the [docker-compose.yml](https://github.com/unobserved-io/furtherance-sync/blob/main/docker-compose.yml) and change the envrionment variables in it for your desired PostgreSQL user and password.
 
-In the folder where you downloaded the `docker-compose.yml`, change the data directory in the `volumes` section to the proper path on your machine where you want the data stored, then run `docker-compose up -d` to start the server.
+In the folder where you downloaded the `docker-compose.yml`, change the data directory in the `volumes` section to the proper path on your machine where you want the data stored. Then change the `USER_ID` and `GROUP_ID` environment variables to match your user. To find your user ID and group ID, run these commands:
+```bash
+id -u  # prints your user ID
+id -g  # prints your group ID
+```
+
+Once complete, run `docker-compose up -d` to start the server.
 
 You can then navigate to `localhost:8663` to start using Nadamark right away!
 
 ## Install on NixOS (Docker)
 
-You can copy the `nadamark.nix` file to install the Docker container on your NixOS machine. Remember to change the path in the `volumes` section to the data directory on your machine.
+You can copy the `nadamark.nix` file to install the Docker container on your NixOS machine. Remember to change the path in `volumes`, as well as the `USER_ID` and `GROUP_ID` environment variables according to the instructions above.
 
 Docker must be enabled on your NixOS machine (by adding `virtualisation.docker.enable = true;` to your Nix config).
 
