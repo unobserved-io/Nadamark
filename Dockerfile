@@ -12,6 +12,9 @@ WORKDIR /usr/src/nadamark
 COPY backend/ ./backend/
 WORKDIR /usr/src/nadamark/backend
 
+RUN apt-get update && apt-get install -y libwayland-dev && \
+    rm -rf /var/lib/apt/lists/*
+
 RUN cargo clean
 RUN cargo build --release
 
