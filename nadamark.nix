@@ -11,5 +11,10 @@
       volumes = [
         "/path/to/data:/bookmarks"
       ];
+      environment = {
+        # Replace with your user's UID/GID (find with 'id -u' and 'id -g' commands)
+        USER_ID = 1000;
+        GROUP_ID = 1000;
+      };
   };
 }

@@ -31,16 +31,36 @@ COPY --from=frontend-builder /usr/src/nadamark/frontend/build ./static
 # Copy the backend binary
 COPY --from=backend-builder /usr/src/nadamark/backend/target/release/nadamark ./
 
-# Create a non-root user
-RUN useradd -r -s /bin/false nadamark && \
-    chown -R nadamark:nadamark /usr/local/bin/nadamark && \
-    mkdir -p /bookmarks && \
-    chown -R nadamark:nadamark /bookmarks
+# Add gosu for running as non-root
+RUN apt-get update && apt-get install -y gosu && \
+    rm -rf /var/lib/apt/lists/*
 
-USER nadamark
+# Create a default non-root user (will be modified at runtime if needed)
+RUN useradd -r -s /bin/false nadamark && \
+    mkdir -p /bookmarks
+
+# Create entrypoint script
+COPY <<'EOF' /entrypoint.sh
+#!/bin/bash
+USER_ID=${USER_ID:-1000}
+GROUP_ID=${GROUP_ID:-1000}
+
+# Recreate nadamark group and user with new IDs
+groupmod -g $GROUP_ID nadamark
+usermod -u $USER_ID nadamark
+
+# Set correct ownership
+chown -R nadamark:nadamark /usr/local/bin/nadamark /bookmarks
+
+# Run command as nadamark user
+exec gosu nadamark "$@"
+EOF
+
+RUN chmod +x /entrypoint.sh
 
 # Set the static files path as an environment variable
 ENV STATIC_FILES_PATH="./static"
 
 EXPOSE 8663
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./nadamark"]
