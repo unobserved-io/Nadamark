@@ -52,21 +52,17 @@
 				breakIndex = i + 1;
 			}
 
-			breakIndex = Math.max(1, breakIndex);
-
 			visibleFavorites = allFavorites.slice(0, breakIndex);
 			overflowFavorites = allFavorites.slice(breakIndex);
 		});
 	}
 
 	onMount(() => {
-		const resizeObserver = new ResizeObserver(() => {
+		const handleResize = () => {
 			updateVisibleFavorites();
-		});
+		};
 
-		if (favoritesContainer) {
-			resizeObserver.observe(favoritesContainer);
-		}
+		window.addEventListener('resize', handleResize);
 
 		const handleClickOutside = (event: MouseEvent) => {
 			if (isOverflowMenuOpen && event.target instanceof Node) {
@@ -80,8 +76,8 @@
 		document.addEventListener('click', handleClickOutside);
 
 		return () => {
-			resizeObserver.disconnect();
 			document.removeEventListener('click', handleClickOutside);
+			window.removeEventListener('resize', handleResize);
 		};
 	});
 
@@ -201,7 +197,7 @@
 		border-radius: 4px;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		z-index: 1000;
-		min-width: 200px;
+		max-width: 80vw !important;
 		margin-top: 4px;
 	}
 
