@@ -175,141 +175,159 @@
 
 <svelte:window onkeydown={handleKeyDown} />
 
-{#if !$rootItemsStore.loading && $rootItemsStore.data}
-	<div class="top-nav">
-		<button
-			type="button"
-			class="nav-item"
-			onclick={() => {
-				resetContextMenu();
-				newItemModalType = 'bookmark';
-				showNewItemModal = true;
-			}}
-		>
-			<Icon icon={'material-symbols-light:bookmark-add-sharp'} />
-		</button>
-		<button
-			type="button"
-			class="nav-item"
-			onclick={() => {
-				resetContextMenu();
-				newItemModalType = 'folder';
-				showNewItemModal = true;
-			}}
-			><Icon icon={'material-symbols-light:create-new-folder-sharp'} />
-		</button>
-		<div class="nav-dropdown" bind:this={dropDownRef}>
-			<button
-				type="button"
-				class="nav-item"
-				onclick={toggleDropDown}
-				aria-expanded={hamburgerMenuIsOpen}
-				aria-label="Menu"
-			>
-				<Icon icon={'game-icons:hamburger-menu'} />
-			</button>
-
-			{#if hamburgerMenuIsOpen}
-				<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
-					<div class="dropdown-item with-submenu">
-						<div class="item-content">
-							<Icon icon="material-symbols:upload" />
-							Import
-							<span class="submenu-arrow">
-								<Icon icon="material-symbols:chevron-right" />
-							</span>
-						</div>
-						<div class="submenu">
-							<label for="bookmarkHTMLUpload" class="dropdown-item">
-								<Icon icon="material-symbols:upload" />
-								Import HTML
-							</label>
-							<input
-								id="bookmarkHTMLUpload"
-								type="file"
-								accept=".html"
-								onchange={handleInputChange}
-								disabled={isLoading}
-								style="display:none"
-							/>
-							<label for="bookmarkLinkwardenUpload" class="dropdown-item">
-								<Icon icon="material-symbols:upload" />
-								Import Linkwarden JSON
-							</label>
-							<input
-								id="bookmarkLinkwardenUpload"
-								type="file"
-								accept=".json"
-								onchange={handleInputChange}
-								disabled={isLoading}
-								style="display:none"
-							/>
-						</div>
-					</div>
-					<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
-						<Icon icon="material-symbols:download" />
-						Export
-					</button>
-				</div>
-			{/if}
-		</div>
-	</div>
-
-	<FavoritesBar />
-
-	<div
-		class="root-drop-zone top"
-		class:drag-active={isDragging}
-		ondragover={(e) => e.preventDefault()}
-		ondragenter={() => (isDragging = true)}
-		ondragleave={() => (isDragging = false)}
-		ondrop={handleRootDrop}
-		role="region"
-		aria-label="Drop zone for root level items"
-	>
-		Drop here to un-nest
-	</div>
-
-	<div class="tree-view">
-		<ul>
-			{#each rootItems.data?.root_folders ?? [] as folder}
-				<li>
-					<TreeItem item={folder} type="folder" />
-				</li>
-			{/each}
-			{#each rootItems.data?.root_bookmarks ?? [] as bookmark}
-				<TreeItem item={bookmark} type="bookmark" />
-			{/each}
-		</ul>
-	</div>
-
-	<div
-		class="root-drop-zone bottom"
-		class:drag-active={isDragging}
-		ondragover={(e) => e.preventDefault()}
-		ondragenter={() => (isDragging = true)}
-		ondragleave={() => (isDragging = false)}
-		ondrop={handleRootDrop}
-		role="region"
-		aria-label="Drop zone for root level items"
-	>
-		Drop here to un-nest
-	</div>
-
-	<ContextMenu bind:showNewItemModal bind:newItemModalType bind:showEditModal bind:editModalType />
-
-	<SearchOverlay
-		isOpen={showSearch}
-		close={() => (showSearch = false)}
-		select={(bookmark) => {
-			showSearch = false;
-			const a = document.createElement('a');
-			a.href = bookmark.url;
-			a.target = '_blank';
-			a.rel = 'noreferrer';
-			a.click();
+<div class="top-nav">
+	<button
+		type="button"
+		class="nav-item"
+		onclick={() => {
+			resetContextMenu();
+			newItemModalType = 'bookmark';
+			showNewItemModal = true;
 		}}
-	/>
+	>
+		<Icon icon={'material-symbols-light:bookmark-add-sharp'} />
+	</button>
+	<button
+		type="button"
+		class="nav-item"
+		onclick={() => {
+			resetContextMenu();
+			newItemModalType = 'folder';
+			showNewItemModal = true;
+		}}
+		><Icon icon={'material-symbols-light:create-new-folder-sharp'} />
+	</button>
+	<div class="nav-dropdown" bind:this={dropDownRef}>
+		<button
+			type="button"
+			class="nav-item"
+			onclick={toggleDropDown}
+			aria-expanded={hamburgerMenuIsOpen}
+			aria-label="Menu"
+		>
+			<Icon icon={'game-icons:hamburger-menu'} />
+		</button>
+
+		{#if hamburgerMenuIsOpen}
+			<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
+				<div class="dropdown-item with-submenu">
+					<div class="item-content">
+						<Icon icon="material-symbols:upload" />
+						Import
+						<span class="submenu-arrow">
+							<Icon icon="material-symbols:chevron-right" />
+						</span>
+					</div>
+					<div class="submenu">
+						<label for="bookmarkHTMLUpload" class="dropdown-item">
+							<Icon icon="material-symbols:upload" />
+							Import HTML
+						</label>
+						<input
+							id="bookmarkHTMLUpload"
+							type="file"
+							accept=".html"
+							onchange={handleInputChange}
+							disabled={isLoading}
+							style="display:none"
+						/>
+						<label for="bookmarkLinkwardenUpload" class="dropdown-item">
+							<Icon icon="material-symbols:upload" />
+							Import Linkwarden JSON
+						</label>
+						<input
+							id="bookmarkLinkwardenUpload"
+							type="file"
+							accept=".json"
+							onchange={handleInputChange}
+							disabled={isLoading}
+							style="display:none"
+						/>
+					</div>
+				</div>
+				<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
+					<Icon icon="material-symbols:download" />
+					Export
+				</button>
+			</div>
+		{/if}
+	</div>
+</div>
+{#if !$rootItemsStore.loading}
+	{#if $rootItemsStore.data && ($rootItemsStore.data.root_bookmarks.length > 0 || $rootItemsStore.data.root_folders.length > 0)}
+		<FavoritesBar />
+
+		<div
+			class="root-drop-zone top"
+			class:drag-active={isDragging}
+			ondragover={(e) => e.preventDefault()}
+			ondragenter={() => (isDragging = true)}
+			ondragleave={() => (isDragging = false)}
+			ondrop={handleRootDrop}
+			role="region"
+			aria-label="Drop zone for root level items"
+		>
+			Drop here to un-nest
+		</div>
+
+		<div class="tree-view">
+			<ul>
+				{#each rootItems.data?.root_folders ?? [] as folder}
+					<li>
+						<TreeItem item={folder} type="folder" />
+					</li>
+				{/each}
+				{#each rootItems.data?.root_bookmarks ?? [] as bookmark}
+					<TreeItem item={bookmark} type="bookmark" />
+				{/each}
+			</ul>
+		</div>
+
+		<div
+			class="root-drop-zone bottom"
+			class:drag-active={isDragging}
+			ondragover={(e) => e.preventDefault()}
+			ondragenter={() => (isDragging = true)}
+			ondragleave={() => (isDragging = false)}
+			ondrop={handleRootDrop}
+			role="region"
+			aria-label="Drop zone for root level items"
+		>
+			Drop here to un-nest
+		</div>
+
+		<ContextMenu
+			bind:showNewItemModal
+			bind:newItemModalType
+			bind:showEditModal
+			bind:editModalType
+		/>
+
+		<SearchOverlay
+			isOpen={showSearch}
+			close={() => (showSearch = false)}
+			select={(bookmark) => {
+				showSearch = false;
+				const a = document.createElement('a');
+				a.href = bookmark.url;
+				a.target = '_blank';
+				a.rel = 'noreferrer';
+				a.click();
+			}}
+		/>
+	{:else if !$rootItemsStore || (!$rootItemsStore.data?.root_bookmarks?.length && !$rootItemsStore.data?.root_folders?.length)}
+		<div class="no-data-icon">
+			<center
+				><Icon
+					icon={'material-symbols-light:bookmark-add-sharp'}
+					style="font-size:calc(32px + 10vw);"
+				/>
+				<p style="font-size:calc(12px + 1vw);">
+					Add a bookmark or folder, or import some, to get started.
+				</p></center
+			>
+		</div>
+	{/if}
 
 	<NewItemModal
 		showModal={showNewItemModal}
@@ -428,5 +446,16 @@
 
 	:global(body.dragging) .root-drop-zone {
 		display: block;
+	}
+
+	.no-data-icon {
+		margin: auto;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: fit-content;
+		width: fit-content;
 	}
 </style>
