@@ -11,6 +11,8 @@
 	import ContextMenu from '$lib/components/ContextMenu.svelte';
 	import EditModal from '$lib/components/EditModal.svelte';
 	import { dev } from '$app/environment';
+	// @ts-expect-error known issue with loading-spinners (#49)
+	import Jellyfish from 'svelte-loading-spinners/Jellyfish.svelte';
 
 	let rootItems = $derived($rootItemsStore);
 
@@ -336,6 +338,10 @@
 	/>
 
 	<EditModal showModal={showEditModal} type={editModalType} close={() => (showEditModal = false)} />
+{:else}
+	<div class="no-data-icon">
+		<Jellyfish size="60" color="#000" unit="px" duration="1s" />
+	</div>
 {/if}
 
 <style>
