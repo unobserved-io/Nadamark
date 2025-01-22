@@ -17,11 +17,13 @@
 	}>();
 
 	function handleShowNewItemModal(type: string) {
+		$contextMenuStore.isOpen = false;
 		newItemModalType = type;
 		showNewItemModal = true;
 	}
 
 	function handleShowEditModal(type: string) {
+		$contextMenuStore.isOpen = false;
 		editModalType = type;
 		showEditModal = true;
 	}
