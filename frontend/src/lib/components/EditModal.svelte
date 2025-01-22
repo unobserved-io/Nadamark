@@ -40,7 +40,8 @@
 		}
 	});
 
-	async function handleSave() {
+	async function handleSave(event: Event) {
+		event.preventDefault();
 		if ((type == 'folder' || validateUrl(itemUrl)) && itemName.length > 0) {
 			try {
 				if (type == 'folder') {
@@ -144,7 +145,7 @@
 						<span>{errorMsg}</span>
 					</div>
 				{/if}
-				<form>
+				<form onsubmit={handleSave}>
 					<div class="form-group">
 						<label for="name">Name</label>
 						<input
@@ -169,7 +170,7 @@
 					</div>
 
 					<center>
-						<button type="submit" class="save" onclick={handleSave}>Save</button>
+						<button type="submit" class="save">Save</button>
 					</center>
 				</form>
 			{:else if type == 'bookmark'}
@@ -179,7 +180,7 @@
 						<span>{errorMsg}</span>
 					</div>
 				{/if}
-				<form>
+				<form onsubmit={handleSave}>
 					<div class="form-group">
 						<label for="name">Name</label>
 						<input
@@ -217,7 +218,7 @@
 					</div>
 
 					<center>
-						<button type="submit" class="save" onclick={handleSave}>Save</button>
+						<button type="submit" class="save">Save</button>
 					</center>
 				</form>
 			{/if}
