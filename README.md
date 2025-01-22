@@ -19,7 +19,7 @@ What more could you want?
 
 ## Install with Docker Compose
 
-The easiest way to install Nadamark is with Docker. Download the [docker-compose.yml](https://github.com/unobserved-io/furtherance-sync/blob/main/docker-compose.yml) and change the envrionment variables in it for your desired PostgreSQL user and password.
+The easiest way to install Nadamark is with Docker. Download the [docker-compose.yml](docker-compose.yml) and change the envrionment variables in it for your desired PostgreSQL user and password.
 
 In the folder where you downloaded the `docker-compose.yml`, change the data directory in the `volumes` section to the proper path on your machine where you want the data stored. Then change the `USER_ID` and `GROUP_ID` environment variables to match your user. To find your user ID and group ID, run these commands:
 ```bash
