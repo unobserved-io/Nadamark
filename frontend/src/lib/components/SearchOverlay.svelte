@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import type { Bookmark } from '$lib/types';
+	import type { Bookmark, Folder } from '$lib/types';
 	import { getAllBookmarks } from '$lib/utils/allBookmarks';
 	import { rootItemsStore } from '$lib/stores/rootItemsStore';
+	import { getAllFolders } from '$lib/utils/allFolders';
 
 	let {
 		isOpen = false,
@@ -18,6 +19,7 @@
 	}>();
 
 	let allBookmarks: Bookmark[] = $state([]);
+	let allFolders: Folder[] = $state([]);
 	let searchTerm = $state('');
 	let results: Bookmark[] = $state([]);
 	let selectedIndex = $state(-1);
@@ -27,6 +29,7 @@
 		if (isOpen) {
 			if ($rootItemsStore.data && !$rootItemsStore.loading) {
 				allBookmarks = getAllBookmarks($rootItemsStore.data);
+				allFolders = getAllFolders($rootItemsStore.data);
 			}
 			tick().then(() => {
 				setTimeout(() => {
@@ -86,6 +89,26 @@
 				break;
 		}
 	}
+
+	function getBookmarkPath(bookmark: Bookmark): string {
+		let path = '';
+		let next_parent: number | null = null;
+		if (bookmark.folder_id) {
+			next_parent = bookmark.folder_id;
+			while (next_parent) {
+				let parent_folder = allFolders.find((f) => f.id === next_parent);
+				if (parent_folder) {
+					path = '/' + parent_folder.name + path;
+					next_parent = parent_folder.parent_id;
+				} else {
+					next_parent = null;
+				}
+			}
+		} else {
+			path = '/';
+		}
+		return path;
+	}
 </script>
 
 {#if isOpen}
@@ -123,6 +146,7 @@
 									onmouseover={() => (selectedIndex = i)}
 								>
 									<h3 class="font-medium">{result.name}</h3>
+									<small>{getBookmarkPath(result)}</small>
 								</a>
 							</li>
 						{/each}
@@ -132,3 +156,9 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	small {
+		color: gray;
+	}
+</style>
