@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Bookmark, FolderNode } from '$lib/types';
+	import type { Bookmark } from '$lib/types';
 	import { rootItemsStore } from '$lib/stores/rootItemsStore';
 	import { getAllFavorites } from '$lib/utils/allBookmarks';
-	import { openContextMenu } from '$lib/stores/contextMenuStore';
+	import { handleContextMenu } from '$lib/stores/contextMenuStore';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
 
@@ -80,16 +80,6 @@
 			window.removeEventListener('resize', handleResize);
 		};
 	});
-
-	// Context menu
-	function handleContextMenu(
-		event: MouseEvent,
-		type: 'folder' | 'bookmark',
-		data: FolderNode | Bookmark
-	) {
-		event.preventDefault();
-		openContextMenu(type, data, { x: event.pageX, y: event.pageY });
-	}
 </script>
 
 {#if allFavorites.length > 0}

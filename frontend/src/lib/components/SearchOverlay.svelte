@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import type { Bookmark, Folder } from '$lib/types';
 	import { getAllBookmarks } from '$lib/utils/allBookmarks';
 	import { rootItemsStore } from '$lib/stores/rootItemsStore';
 	import { getAllFolders } from '$lib/utils/allFolders';
+	import { contextMenuStore, handleContextMenu } from '$lib/stores/contextMenuStore';
 
 	let {
 		isOpen = false,
@@ -27,10 +28,8 @@
 
 	$effect(() => {
 		if (isOpen) {
-			if ($rootItemsStore.data && !$rootItemsStore.loading) {
-				allBookmarks = getAllBookmarks($rootItemsStore.data);
-				allFolders = getAllFolders($rootItemsStore.data);
-			}
+			searchTerm = '';
+			results = [];
 			tick().then(() => {
 				setTimeout(() => {
 					searchInput?.focus();
@@ -109,6 +108,38 @@
 		}
 		return path;
 	}
+
+	let unsubscribeRootItems: (() => void) | undefined;
+
+	onMount(() => {
+		unsubscribeRootItems = rootItemsStore.subscribe((store) => {
+			if (store.data && !store.loading) {
+				allBookmarks = getAllBookmarks(store.data);
+				allFolders = getAllFolders(store.data);
+				if (searchTerm) {
+					handleSearch();
+				}
+			}
+		});
+
+		// Close context menu if user clicks outside of menu
+		const handleClick = (event: MouseEvent) => {
+			if ($contextMenuStore.isOpen && event.target instanceof Node) {
+				const contextMenu = document.querySelector('.context-menu');
+				if (contextMenu && !contextMenu.contains(event.target)) {
+					$contextMenuStore.isOpen = false;
+				}
+			}
+		};
+
+		document.addEventListener('click', handleClick);
+		return () => {
+			document.removeEventListener('click', handleClick);
+			if (unsubscribeRootItems) {
+				unsubscribeRootItems();
+			}
+		};
+	});
 </script>
 
 {#if isOpen}
@@ -144,6 +175,7 @@
 									onclick={preventDefault(() => selectItem())}
 									onfocus={() => ({})}
 									onmouseover={() => (selectedIndex = i)}
+									oncontextmenu={(event) => handleContextMenu(event, 'bookmark', result)}
 								>
 									<h3 class="font-medium">{result.name}</h3>
 									<small>{getBookmarkPath(result)}</small>

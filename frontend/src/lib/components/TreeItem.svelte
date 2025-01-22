@@ -3,7 +3,7 @@
 	import Icon from '@iconify/svelte';
 	import type { Bookmark, FolderNode } from '$lib/types';
 	import Self from './TreeItem.svelte';
-	import { contextMenuStore, openContextMenu } from '$lib/stores/contextMenuStore';
+	import { contextMenuStore, handleContextMenu } from '$lib/stores/contextMenuStore';
 	import { refreshTree } from '$lib/stores/rootItemsStore';
 	import { dev } from '$app/environment';
 
@@ -92,16 +92,6 @@
 
 	function handleDragEnd() {
 		document.body.classList.remove('dragging');
-	}
-
-	// Context menu
-	function handleContextMenu(
-		event: MouseEvent,
-		type: 'folder' | 'bookmark',
-		data: FolderNode | Bookmark
-	) {
-		event.preventDefault();
-		openContextMenu(type, data, { x: event.pageX, y: event.pageY });
 	}
 
 	onMount(() => {

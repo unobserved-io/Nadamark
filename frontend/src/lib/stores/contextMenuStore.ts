@@ -33,3 +33,12 @@ export function openContextMenu(
 export function resetContextMenu() {
 	contextMenuStore.set(initialState);
 }
+
+export function handleContextMenu(
+	event: MouseEvent,
+	type: 'folder' | 'bookmark',
+	data: FolderNode | Bookmark
+) {
+	event.preventDefault();
+	openContextMenu(type, data, { x: event.pageX, y: event.pageY });
+}
