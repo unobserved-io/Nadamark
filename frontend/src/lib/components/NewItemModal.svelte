@@ -4,6 +4,7 @@
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
 	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
 	import { dev } from '$app/environment';
+	import { tick } from 'svelte';
 
 	let {
 		showModal = false,
@@ -20,6 +21,7 @@
 	let itemName = $state('');
 	let itemUrl = $state('');
 	let errorMsg: string | null = $state(null);
+	let nameInput = $state<HTMLInputElement>();
 
 	$effect(() => {
 		if (showModal) {
@@ -27,6 +29,11 @@
 				allFolders = getAllFolders($rootItemsStore.data);
 			}
 			selectedFolder = $contextMenuStore.data?.id;
+			tick().then(() => {
+				setTimeout(() => {
+					nameInput?.focus();
+				}, 100);
+			});
 		}
 	});
 
@@ -144,6 +151,7 @@
 							data-lpignore="true"
 							data-protonpass-ignore="true"
 							bind:value={itemName}
+							bind:this={nameInput}
 						/>
 					</div>
 
@@ -179,6 +187,7 @@
 							data-lpignore="true"
 							data-protonpass-ignore="true"
 							bind:value={itemName}
+							bind:this={nameInput}
 						/>
 					</div>
 
