@@ -1,6 +1,7 @@
 use crate::models::{
     Bookmark, Folder, NewBookmark, NewFolder, UpdateBookmarkRequest, UpdateFolderRequest,
 };
+use diesel::sql_query;
 use diesel::{
     dsl::not, prelude::*, result::Error, Connection, ExpressionMethods, SqliteConnection,
 };
@@ -53,8 +54,12 @@ pub fn get_default_database_path() -> String {
 
 fn establish_connection() -> SqliteConnection {
     let database_url = get_default_database_path();
-    SqliteConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+    let mut connection = SqliteConnection::establish(&database_url)
+        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url));
+
+    let _ = sql_query("PRAGMA foreign_keys = ON").execute(&mut connection);
+
+    connection
 }
 
 pub fn initialize_database() {
@@ -148,17 +153,6 @@ pub fn get_all_bookmarks() -> Result<Vec<Bookmark>, Error> {
     bookmarks.load(connection)
 }
 
-pub fn fetch_child_bookmarks(parent_id: i32) -> Result<Vec<Bookmark>, Error> {
-    use crate::schema::bookmarks::dsl::*;
-
-    let connection = &mut establish_connection();
-
-    bookmarks
-        .filter(folder_id.eq(parent_id))
-        .select(Bookmark::as_select())
-        .load(connection)
-}
-
 pub fn update_folder(folder: UpdateFolderRequest) -> Result<usize, Error> {
     use crate::schema::folders::dsl::*;
 
@@ -187,14 +181,6 @@ pub fn delete_folder(folder_id: i32) -> Result<usize, Error> {
     use crate::schema::folders::dsl::*;
 
     let connection = &mut establish_connection();
-
-    if let Ok(bookmarks) = fetch_child_bookmarks(folder_id) {
-        for bookmark in bookmarks {
-            if let Err(e) = delete_bookmark(bookmark.id) {
-                eprintln!("Error deleting child bookmark: {}", e);
-            }
-        }
-    }
 
     diesel::delete(folders.filter(id.eq(folder_id))).execute(connection)
 }

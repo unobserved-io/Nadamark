@@ -20,3 +20,6 @@ diesel::table! {
         favorite -> Bool,
     }
 }
+
+diesel::joinable!(bookmarks -> folders (folder_id));
+diesel::allow_tables_to_appear_in_same_query!(folders, bookmarks);
