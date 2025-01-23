@@ -6,13 +6,15 @@ type ContextMenuState = {
 	type: 'folder' | 'bookmark' | null;
 	data: FolderNode | Bookmark | null;
 	position: { x: number; y: number };
+	parentId: number | null;
 };
 
 const initialState: ContextMenuState = {
 	isOpen: false,
 	type: null,
 	data: null,
-	position: { x: 0, y: 0 }
+	position: { x: 0, y: 0 },
+	parentId: null
 };
 
 export const contextMenuStore = writable<ContextMenuState>(initialState);
@@ -22,11 +24,15 @@ export function openContextMenu(
 	data: FolderNode | Bookmark,
 	position: { x: number; y: number }
 ) {
+	const parentId =
+		type === 'folder' ? (data as FolderNode).parent_id : (data as Bookmark).folder_id;
+
 	contextMenuStore.set({
 		isOpen: true,
 		type,
 		data,
-		position
+		position,
+		parentId
 	});
 }
 

@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
-	import { refreshTree } from '$lib/stores/rootItemsStore';
+	import { refreshTree, treeOperations } from '$lib/stores/rootItemsStore';
 	import type { Bookmark } from '$lib/types';
-	import { dev } from '$app/environment';
 
 	let {
 		showNewItemModal = $bindable(),
@@ -31,53 +30,20 @@
 	// Favorite
 	async function toggleFavorite() {
 		$contextMenuStore.isOpen = false;
-		try {
-			const response = await fetch(
-				dev ? 'http://localhost:8663/api/favorite-bookmark' : '/api/favorite-bookmark',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify($contextMenuStore.data?.id)
-				}
-			);
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			} else {
-				refreshTree();
-			}
-		} catch (error) {
-			console.error('Error toggling favorite:', error);
+		if ($contextMenuStore.data) {
+			await treeOperations.toggleFavorite($contextMenuStore.data.id, $contextMenuStore.parentId);
 		}
 	}
 
 	// Delete Item
 	async function deleteItem(type: string) {
 		$contextMenuStore.isOpen = false;
-		let apiUrl: string = '';
-		try {
-			if (type == 'folder') {
-				apiUrl = dev ? 'http://localhost:8663/api/delete-folder' : '/api/delete-folder';
-			} else if (type == 'bookmark') {
-				apiUrl = dev ? 'http://localhost:8663/api/delete-bookmark' : '/api/delete-bookmark';
-			}
-			const response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify($contextMenuStore.data?.id)
-			});
-
-			if (!response.ok) {
-				throw new Error(`HTTP error! status: ${response.status}`);
-			} else {
-				refreshTree();
-			}
-		} catch (error) {
-			console.error('Error deleting item:', error);
+		if ($contextMenuStore.data) {
+			await treeOperations.deleteItem(
+				$contextMenuStore.data.id,
+				type as 'folder' | 'bookmark',
+				$contextMenuStore.parentId
+			);
 		}
 	}
 

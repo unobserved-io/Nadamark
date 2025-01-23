@@ -36,6 +36,7 @@ async fn main() -> std::io::Result<()> {
     let router =
         Router::new()
             .route("/api/tree", get(tree::refresh_tree))
+            .route("/api/tree/:folder_id", get(tree::refresh_branch))
             .route("/api/move", post(drag_drop::handle_move))
             .route("/api/move-to-root", post(drag_drop::handle_move_to_root))
             .route("/api/import-html", post(import::import_bookmarks_html))
