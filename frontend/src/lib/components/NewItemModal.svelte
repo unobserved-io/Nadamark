@@ -41,7 +41,6 @@
 		if ((type == 'folder' || validateUrl(itemUrl)) && itemName.length > 0) {
 			if ($contextMenuStore.data) {
 				if (type == 'folder') {
-					console.log(selectedFolder);
 					treeOperations.newFolder($contextMenuStore.data.id, itemName, selectedFolder);
 					closeModal();
 				} else if (type == 'bookmark') {
