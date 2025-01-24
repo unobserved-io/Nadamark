@@ -2,8 +2,7 @@
 	import type { Bookmark, Folder } from '$lib/types';
 	import { getAllFolders } from '$lib/utils/allFolders';
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
-	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
-	import { dev } from '$app/environment';
+	import { rootItemsStore, treeOperations } from '$lib/stores/rootItemsStore';
 
 	let {
 		showModal = false,
@@ -16,7 +15,7 @@
 	}>();
 
 	let allFolders: Folder[] = $state([]);
-	let selectedFolder: number | null = $state(null);
+	let parentFolder: number | null = $state(null);
 	let itemName: string = $state('');
 	let itemUrl = $state('');
 	let errorMsg: string | null = $state(null);
@@ -31,9 +30,9 @@
 				itemName = $contextMenuStore.data.name;
 
 				if (type == `folder`) {
-					selectedFolder = ($contextMenuStore.data as Folder).parent_id;
+					parentFolder = ($contextMenuStore.data as Folder).parent_id;
 				} else if (type == 'bookmark') {
-					selectedFolder = ($contextMenuStore.data as Bookmark).folder_id;
+					parentFolder = ($contextMenuStore.data as Bookmark).folder_id;
 					itemUrl = ($contextMenuStore.data as Bookmark).url;
 				}
 			}
@@ -43,58 +42,16 @@
 	async function handleSave(event: Event) {
 		event.preventDefault();
 		if ((type == 'folder' || validateUrl(itemUrl)) && itemName.length > 0) {
-			try {
+			if ($contextMenuStore.data) {
 				if (type == 'folder') {
-					if (itemName.trim().length > 0) {
-						const response = await fetch(
-							dev ? 'http://localhost:8663/api/update-folder' : '/api/update-folder',
-							{
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify({
-									id: $contextMenuStore.data?.id,
-									name: itemName,
-									parent_id: selectedFolder
-								})
-							}
-						);
-
-						if (!response.ok) {
-							throw new Error('Failed to update folder');
-						}
-						refreshTree();
-						closeModal();
-					}
+					treeOperations.editFolder($contextMenuStore.data.id, itemName, parentFolder);
+					closeModal();
 				} else if (type == 'bookmark') {
-					if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-						const response = await fetch(
-							dev ? 'http://localhost:8663/api/update-bookmark' : '/api/update-bookmark',
-							{
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify({
-									id: $contextMenuStore.data?.id,
-									name: itemName,
-									url: itemUrl,
-									folder_id: selectedFolder
-								})
-							}
-						);
-
-						if (!response.ok) {
-							throw new Error('Failed to update bookmark');
-						}
-						refreshTree();
-						closeModal();
-					}
+					treeOperations.editBookmark($contextMenuStore.data.id, itemName, itemUrl, parentFolder);
+					closeModal();
 				}
-			} catch (err) {
-				console.error('Edit failed:', err);
-				closeModal();
+			} else {
+				console.error('No data in contextMenuStore.data.');
 			}
 		} else {
 			if (itemName.length <= 0) {
@@ -126,7 +83,7 @@
 		itemName = '';
 		itemUrl = '';
 		allFolders = [];
-		selectedFolder = null;
+		parentFolder = null;
 		errorMsg = null;
 		close();
 	}
@@ -161,7 +118,7 @@
 
 					<div class="form-group">
 						<label for="location">Location</label>
-						<select name="folders" id="location" bind:value={selectedFolder}>
+						<select name="folders" id="location" bind:value={parentFolder}>
 							<option value={undefined}></option>
 							{#each allFolders as folder}
 								<option value={folder.id}>{folder.name}</option>
@@ -209,7 +166,7 @@
 
 					<div class="form-group">
 						<label for="location">Location</label>
-						<select name="folders" id="location" bind:value={selectedFolder}>
+						<select name="folders" id="location" bind:value={parentFolder}>
 							<option value={undefined}></option>
 							{#each allFolders as folder}
 								<option value={folder.id}>{folder.name}</option>

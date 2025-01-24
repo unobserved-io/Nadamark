@@ -37,7 +37,7 @@ function updateBranch(tree: RootItems, parentId: number | null, newItems: RootIt
 		return false;
 	}
 
-	updatedTree.root_folders.forEach((folder) => updateRecursive(folder));
+	updatedTree.root_folders.forEach((folder: FolderNode) => updateRecursive(folder));
 	return updatedTree;
 }
 
@@ -115,64 +115,18 @@ export const treeOperations = {
 		}
 	},
 
-	async editFolder(itemId: number, itemName, parentId: number | null) {
+	async editFolder(itemId: number, itemName: string, parentId: number | null) {
 		try {
-				if (itemName.trim().length > 0) {
-					const response = await fetch(`${API_BASE}/update-${itemType}`)
-						{
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-								id: itemId,
-								name: itemName,
-								parent_id: selectedFolder
-							})
-						}
-					);
-
-					if (!response.ok) {
-						throw new Error('Failed to update folder');
-					}
-					refreshTree();
-					closeModal();
-				}
-			} else if (type == 'bookmark') {
-				if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-					const response = await fetch(
-						dev ? 'http://localhost:8663/api/update-bookmark' : '/api/update-bookmark',
-						{
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-								id: $contextMenuStore.data?.id,
-								name: itemName,
-								url: itemUrl,
-								folder_id: selectedFolder
-							})
-						}
-					);
-
-					if (!response.ok) {
-						throw new Error('Failed to update bookmark');
-					}
-					refreshTree();
-					closeModal();
-				}
-			}
-		} catch (err) {
-			console.error('Edit failed:', err);
-			closeModal();
-		}
-
-		try {
-			const response = await fetch(`${API_BASE}/delete-${itemType}`, {
+			const response = await fetch(`${API_BASE}/update-folder`, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(itemId)
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: itemId,
+					name: itemName,
+					parent_id: parentId
+				})
 			});
 
 			if (!response.ok) {
@@ -181,8 +135,34 @@ export const treeOperations = {
 
 			await this.refreshBranch(parentId);
 		} catch (error) {
-			console.error(`Error deleting ${itemType}:`, error);
+			console.error('Failed to edit folder:', error);
+		}
+	},
+
+	async editBookmark(itemId: number, itemName: string, itemUrl: string, parentId: number | null) {
+		try {
+			console.log('Fetched');
+
+			const response = await fetch(`${API_BASE}/update-bookmark`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: itemId,
+					name: itemName,
+					url: itemUrl,
+					folder_id: parentId
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
 			await this.refreshBranch(parentId);
+		} catch (error) {
+			console.error('Failed to edit bookmark:', error);
 		}
 	},
 
@@ -203,7 +183,6 @@ export const treeOperations = {
 			await this.refreshBranch(parentId);
 		} catch (error) {
 			console.error('Error toggling favorite:', error);
-			await this.refreshBranch(parentId);
 		}
 	}
 };

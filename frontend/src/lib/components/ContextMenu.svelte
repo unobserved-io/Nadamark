@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
-	import { refreshTree, treeOperations } from '$lib/stores/rootItemsStore';
+	import { treeOperations } from '$lib/stores/rootItemsStore';
 	import type { Bookmark } from '$lib/types';
 
 	let {
