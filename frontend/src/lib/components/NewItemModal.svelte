@@ -2,8 +2,7 @@
 	import type { Folder } from '$lib/types';
 	import { getAllFolders } from '$lib/utils/allFolders';
 	import { contextMenuStore } from '$lib/stores/contextMenuStore';
-	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
-	import { dev } from '$app/environment';
+	import { rootItemsStore, treeOperations } from '$lib/stores/rootItemsStore';
 	import { tick } from 'svelte';
 
 	let {
@@ -17,7 +16,7 @@
 	}>();
 
 	let allFolders: Folder[] = $state([]);
-	let selectedFolder: number | undefined = $state();
+	let selectedFolder: number | null = $state(null);
 	let itemName = $state('');
 	let itemUrl = $state('');
 	let errorMsg: string | null = $state(null);
@@ -28,7 +27,7 @@
 			if ($rootItemsStore.data && !$rootItemsStore.loading) {
 				allFolders = getAllFolders($rootItemsStore.data);
 			}
-			selectedFolder = $contextMenuStore.data?.id;
+			selectedFolder = $contextMenuStore.data?.id ?? null;
 			tick().then(() => {
 				setTimeout(() => {
 					nameInput?.focus();
@@ -40,56 +39,17 @@
 	async function handleSave(event: Event) {
 		event.preventDefault();
 		if ((type == 'folder' || validateUrl(itemUrl)) && itemName.length > 0) {
-			try {
+			if ($contextMenuStore.data) {
 				if (type == 'folder') {
-					if (itemName.trim().length > 0) {
-						const response = await fetch(
-							dev ? 'http://localhost:8663/api/create-folder' : '/api/create-folder',
-							{
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify({
-									name: itemName,
-									parent_id: selectedFolder
-								})
-							}
-						);
-
-						if (!response.ok) {
-							throw new Error('Failed to create folder');
-						}
-						refreshTree();
-						closeModal();
-					}
+					console.log(selectedFolder);
+					treeOperations.newFolder($contextMenuStore.data.id, itemName, selectedFolder);
+					closeModal();
 				} else if (type == 'bookmark') {
-					if (itemName.trim().length > 0 && itemUrl.trim().length > 0) {
-						const response = await fetch(
-							dev ? 'http://localhost:8663/api/create-bookmark' : '/api/create-bookmark',
-							{
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/json'
-								},
-								body: JSON.stringify({
-									name: itemName,
-									url: itemUrl,
-									folder_id: selectedFolder
-								})
-							}
-						);
-
-						if (!response.ok) {
-							throw new Error('Failed to create bookmark');
-						}
-						refreshTree();
-						closeModal();
-					}
+					treeOperations.newBookmark($contextMenuStore.data.id, itemName, itemUrl, selectedFolder);
+					closeModal();
 				}
-			} catch (err) {
-				console.error('Creation failed:', err);
-				closeModal();
+			} else {
+				console.error('No data in contextMenuStore.data.');
 			}
 		} else {
 			if (itemName.length <= 0) {
@@ -121,7 +81,7 @@
 		itemName = '';
 		itemUrl = '';
 		allFolders = [];
-		selectedFolder = undefined;
+		selectedFolder = null;
 		errorMsg = null;
 		close();
 	}
@@ -158,7 +118,7 @@
 					<div class="form-group">
 						<label for="location">Location</label>
 						<select name="folders" id="location" bind:value={selectedFolder}>
-							<option value={undefined}></option>
+							<option value={null}></option>
 							{#each allFolders as folder}
 								<option value={folder.id}>{folder.name}</option>
 							{/each}
@@ -207,7 +167,7 @@
 					<div class="form-group">
 						<label for="location">Location</label>
 						<select name="folders" id="location" bind:value={selectedFolder}>
-							<option value={undefined}></option>
+							<option value={null}></option>
 							{#each allFolders as folder}
 								<option value={folder.id}>{folder.name}</option>
 							{/each}

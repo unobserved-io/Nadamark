@@ -4,7 +4,7 @@
 	import Icon from '@iconify/svelte';
 	import { onMount } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import { rootItemsStore, refreshTree } from '$lib/stores/rootItemsStore';
+	import { rootItemsStore, treeOperations } from '$lib/stores/rootItemsStore';
 	import FavoritesBar from '$lib/components/FavoritesBar.svelte';
 	import NewItemModal from '$lib/components/NewItemModal.svelte';
 	import { resetContextMenu } from '$lib/stores/contextMenuStore';
@@ -45,7 +45,7 @@
 	}
 
 	onMount(() => {
-		refreshTree();
+		treeOperations.refreshFullTree();
 		document.addEventListener('click', handleClickOutside);
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
@@ -88,9 +88,9 @@
 
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
-			} else {
-				refreshTree();
 			}
+
+			treeOperations.refreshFullTree();
 		} catch (error) {
 			console.error('Error importing bookmarks:', error);
 		} finally {
@@ -138,32 +138,9 @@
 
 		if (!e.dataTransfer) return;
 
-		try {
-			const data = JSON.parse(e.dataTransfer.getData('application/json'));
+		const data = JSON.parse(e.dataTransfer.getData('application/json'));
 
-			const response = await fetch(
-				dev ? 'http://localhost:8663/api/move-to-root' : '/api/move-to-root',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						item_type: data.type,
-						item_id: data.id,
-						target_folder_id: 0
-					})
-				}
-			);
-
-			if (!response.ok) {
-				throw new Error('Failed to move item to root');
-			}
-
-			refreshTree();
-		} catch (err) {
-			console.error('Drop failed:', err);
-		}
+		treeOperations.moveToRoot(data.id, data.type);
 	}
 
 	// New Item

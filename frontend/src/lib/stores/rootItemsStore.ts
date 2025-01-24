@@ -141,8 +141,6 @@ export const treeOperations = {
 
 	async editBookmark(itemId: number, itemName: string, itemUrl: string, parentId: number | null) {
 		try {
-			console.log('Fetched');
-
 			const response = await fetch(`${API_BASE}/update-bookmark`, {
 				method: 'POST',
 				headers: {
@@ -163,6 +161,82 @@ export const treeOperations = {
 			await this.refreshBranch(parentId);
 		} catch (error) {
 			console.error('Failed to edit bookmark:', error);
+		}
+	},
+
+	async newFolder(itemId: number, itemName: string, parentId: number | null) {
+		try {
+			const response = await fetch(`${API_BASE}/create-folder`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: itemId,
+					name: itemName,
+					parent_id: parentId
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			await this.refreshBranch(parentId);
+		} catch (error) {
+			console.error('Failed to create folder:', error);
+		}
+	},
+
+	async newBookmark(itemId: number, itemName: string, itemUrl: string, parentId: number | null) {
+		try {
+			const response = await fetch(`${API_BASE}/create-bookmark`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					id: itemId,
+					name: itemName,
+					url: itemUrl,
+					folder_id: parentId
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			await this.refreshBranch(parentId);
+		} catch (error) {
+			console.error('Failed to create bookmark:', error);
+		}
+	},
+
+	async moveToRoot(itemId: number, itemType: string) {
+		try {
+			const response = await fetch(
+				dev ? 'http://localhost:8663/api/move-to-root' : '/api/move-to-root',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						item_type: itemType,
+						item_id: itemId,
+						target_folder_id: 0
+					})
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			await this.refreshFullTree();
+		} catch (err) {
+			console.error('Drop failed:', err);
 		}
 	},
 

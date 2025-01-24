@@ -119,7 +119,7 @@
 					<div class="form-group">
 						<label for="location">Location</label>
 						<select name="folders" id="location" bind:value={parentFolder}>
-							<option value={undefined}></option>
+							<option value={null}></option>
 							{#each allFolders as folder}
 								<option value={folder.id}>{folder.name}</option>
 							{/each}
@@ -167,7 +167,7 @@
 					<div class="form-group">
 						<label for="location">Location</label>
 						<select name="folders" id="location" bind:value={parentFolder}>
-							<option value={undefined}></option>
+							<option value={null}></option>
 							{#each allFolders as folder}
 								<option value={folder.id}>{folder.name}</option>
 							{/each}
