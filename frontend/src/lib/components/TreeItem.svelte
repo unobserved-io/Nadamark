@@ -4,8 +4,7 @@
 	import type { Bookmark, FolderNode } from '$lib/types';
 	import Self from './TreeItem.svelte';
 	import { contextMenuStore, handleContextMenu } from '$lib/stores/contextMenuStore';
-	import { refreshTree } from '$lib/stores/rootItemsStore';
-	import { dev } from '$app/environment';
+	import { treeOperations } from '$lib/stores/rootItemsStore';
 
 	let { item, type } = $props<{
 		item: FolderNode | Bookmark;
@@ -65,29 +64,8 @@
 			e.currentTarget.classList.remove('drag-over');
 		}
 
-		try {
-			const data = JSON.parse(e.dataTransfer.getData('application/json'));
-
-			const response = await fetch(dev ? 'http://localhost:8663/api/move' : '/api/move', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					item_type: data.type,
-					item_id: data.id,
-					target_folder_id: item.id
-				})
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to move item');
-			}
-
-			refreshTree();
-		} catch (err) {
-			console.error('Drop failed:', err);
-		}
+		const data = JSON.parse(e.dataTransfer.getData('application/json'));
+		treeOperations.moveItem(data.id, data.type, item.id);
 	}
 
 	function handleDragEnd() {

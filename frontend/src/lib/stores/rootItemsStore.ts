@@ -213,22 +213,43 @@ export const treeOperations = {
 		}
 	},
 
+	async moveItem(itemId: number, itemType: string, targetId: number) {
+		try {
+			const response = await fetch(`${API_BASE}/move`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					item_type: itemType,
+					item_id: itemId,
+					target_folder_id: targetId
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+
+			await this.refreshFullTree();
+		} catch (err) {
+			console.error('Drop failed:', err);
+		}
+	},
+
 	async moveToRoot(itemId: number, itemType: string) {
 		try {
-			const response = await fetch(
-				dev ? 'http://localhost:8663/api/move-to-root' : '/api/move-to-root',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						item_type: itemType,
-						item_id: itemId,
-						target_folder_id: 0
-					})
-				}
-			);
+			const response = await fetch(`${API_BASE}/move-to-root`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					item_type: itemType,
+					item_id: itemId,
+					target_folder_id: 0
+				})
+			});
 
 			if (!response.ok) {
 				throw new Error(`HTTP error! status: ${response.status}`);
