@@ -111,9 +111,11 @@
 				{item.name}</summary
 			>
 			<ul class="folder-children">
-				{#each item.children as child}
+				{#each item.children as child (child.id)}
 					<li class="folder-item">
-						<Self item={child} type="folder" />
+						{#key child.id}
+							<Self item={child} type="folder" />
+						{/key}
 					</li>
 				{/each}
 				{#each item.bookmarks as bookmark}

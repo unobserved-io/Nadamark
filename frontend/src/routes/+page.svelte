@@ -251,13 +251,17 @@
 
 		<div class="tree-view">
 			<ul>
-				{#each rootItems.data?.root_folders ?? [] as folder}
+				{#each rootItems.data?.root_folders ?? [] as folder (folder.id)}
 					<li>
-						<TreeItem item={folder} type="folder" />
+						{#key folder.id}
+							<TreeItem item={folder} type="folder" />
+						{/key}
 					</li>
 				{/each}
-				{#each rootItems.data?.root_bookmarks ?? [] as bookmark}
-					<TreeItem item={bookmark} type="bookmark" />
+				{#each rootItems.data?.root_bookmarks ?? [] as bookmark (bookmark.id)}
+					{#key bookmark.id}
+						<TreeItem item={bookmark} type="bookmark" />
+					{/key}
 				{/each}
 			</ul>
 		</div>
