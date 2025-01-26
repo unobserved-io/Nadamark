@@ -39,11 +39,7 @@
 	async function deleteItem(type: string) {
 		$contextMenuStore.isOpen = false;
 		if ($contextMenuStore.data) {
-			await treeOperations.deleteItem(
-				$contextMenuStore.data.id,
-				type as 'folder' | 'bookmark',
-				$contextMenuStore.parentId
-			);
+			await treeOperations.deleteItem($contextMenuStore.data.id, type as 'folder' | 'bookmark');
 		}
 	}
 

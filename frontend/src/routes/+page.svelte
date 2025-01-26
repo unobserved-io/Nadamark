@@ -14,8 +14,6 @@
 	// @ts-expect-error known issue with loading-spinners (#49)
 	import Jellyfish from 'svelte-loading-spinners/Jellyfish.svelte';
 
-	let rootItems = $derived($rootItemsStore);
-
 	function handleKeyDown(event: KeyboardEvent) {
 		switch (event.key) {
 			case 'f':
@@ -140,7 +138,7 @@
 
 		const data = JSON.parse(e.dataTransfer.getData('application/json'));
 
-		treeOperations.moveToRoot(data.id, data.type);
+		treeOperations.moveItem(data.id, data.type, null);
 	}
 
 	// New Item
@@ -251,14 +249,14 @@
 
 		<div class="tree-view">
 			<ul>
-				{#each rootItems.data?.root_folders ?? [] as folder (folder.id)}
+				{#each $rootItemsStore.data?.root_folders ?? [] as folder (folder.id)}
 					<li>
 						{#key folder.id}
 							<TreeItem item={folder} type="folder" />
 						{/key}
 					</li>
 				{/each}
-				{#each rootItems.data?.root_bookmarks ?? [] as bookmark (bookmark.id)}
+				{#each $rootItemsStore.data?.root_bookmarks ?? [] as bookmark (bookmark.id)}
 					{#key bookmark.id}
 						<TreeItem item={bookmark} type="bookmark" />
 					{/key}

@@ -89,7 +89,7 @@ pub enum ItemType {
 pub struct MoveItemRequest {
     pub item_type: ItemType,
     pub item_id: i32,
-    pub target_folder_id: i32,
+    pub target_folder_id: Option<i32>,
 }
 
 #[derive(Debug, Deserialize)]

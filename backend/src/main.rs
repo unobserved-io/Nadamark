@@ -36,9 +36,7 @@ async fn main() -> std::io::Result<()> {
     let router =
         Router::new()
             .route("/api/tree", get(tree::refresh_tree))
-            .route("/api/tree/:folder_id", get(tree::refresh_branch))
             .route("/api/move", post(drag_drop::handle_move))
-            .route("/api/move-to-root", post(drag_drop::handle_move_to_root))
             .route("/api/import-html", post(import::import_bookmarks_html))
             .route(
                 "/api/import-linkwarden",
@@ -65,7 +63,6 @@ async fn main() -> std::io::Result<()> {
 
     let server = "0.0.0.0:8663";
     let listener = tokio::net::TcpListener::bind(&server).await?;
-    // info!("Server running on {}", &server);
     let service = router.into_make_service_with_connect_info::<std::net::SocketAddr>();
     axum::serve(listener, service).await?;
 
