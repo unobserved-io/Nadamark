@@ -1,21 +1,23 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
-use axum::{response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse, Json};
 
 use crate::{
-    database,
+    database::{self, Pool},
     models::{Bookmark, FolderNode, RootItems},
 };
 
-pub async fn refresh_tree() -> impl IntoResponse {
-    let folders = match database::get_all_folders() {
+pub async fn refresh_tree(State(pool): State<Arc<Pool>>) -> impl IntoResponse {
+    let mut connection = pool.get().expect("Failed to get connection from pool");
+
+    let folders = match database::get_all_folders(&mut connection) {
         Ok(items) => items,
         Err(e) => {
             eprintln!("Error fetching folders: {}", e);
             vec![]
         }
     };
-    let bookmarks = match database::get_all_bookmarks() {
+    let bookmarks = match database::get_all_bookmarks(&mut connection) {
         Ok(items) => items,
         Err(e) => {
             eprintln!("Error fetching folders: {}", e);

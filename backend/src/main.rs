@@ -8,6 +8,8 @@ mod modify;
 mod schema;
 mod tree;
 
+use std::sync::Arc;
+
 use axum::{
     extract::DefaultBodyLimit,
     http,
@@ -21,13 +23,12 @@ use tower_http::{
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    database::initialize_database();
+    let pool = Arc::new(database::initialize_database());
 
     let static_path = std::env::var("STATIC_FILES_PATH").unwrap_or_else(|_| {
         // Development path
         #[cfg(debug_assertions)]
         return "../frontend/build".to_string();
-
         // Production path
         #[cfg(not(debug_assertions))]
         return "./static".to_string();
@@ -50,6 +51,7 @@ async fn main() -> std::io::Result<()> {
             .route("/api/update-bookmark", post(modify::update_bookmark))
             .route("/api/delete-folder", post(modify::delete_folder))
             .route("/api/delete-bookmark", post(modify::delete_bookmark))
+            .with_state(pool)
             .fallback_service(ServeDir::new(&static_path).not_found_service(
                 ServeDir::new(&static_path).append_index_html_on_directories(true),
             ))

@@ -57,7 +57,7 @@
 			if (itemName.length <= 0) {
 				errorMsg = 'Please give it a name.';
 			} else if (!validateUrl(itemUrl)) {
-				errorMsg = 'Please enter a valid URL.';
+				errorMsg = 'Please enter a valid URL (with https:// etc.)';
 			}
 		}
 	}

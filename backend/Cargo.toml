@@ -13,7 +13,12 @@ lto = true
 
 [dependencies]
 axum = "0.7"
-diesel = { version = "2.2", features = ["sqlite", "time"] }
+diesel = { version = "2.2", features = [
+    "sqlite",
+    "time",
+    "r2d2",
+    "returning_clauses_for_sqlite_3_35",
+] }
 diesel_migrations = "2.2"
 directories = "5.0"
 rfd = "0.15"

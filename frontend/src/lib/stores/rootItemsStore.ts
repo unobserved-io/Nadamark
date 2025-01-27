@@ -221,7 +221,7 @@ export const treeOperations = {
 		}
 	},
 
-	async newFolder(itemId: number, itemName: string, parentId: number | null) {
+	async newFolder(itemName: string, parentId: number | null) {
 		try {
 			const response = await fetch(`${API_BASE}/create-folder`, {
 				method: 'POST',
@@ -229,18 +229,19 @@ export const treeOperations = {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					id: itemId,
 					name: itemName,
 					parent_id: parentId
 				})
 			});
 
 			if (response.ok) {
+				const data = await response.json();
+				const newId = data.id;
 				rootItemsStore.update((state) => {
 					if (!state.data) return state;
 
 					const newFolder: FolderNode = {
-						id: itemId, // TODO get from response
+						id: newId, // TODO get from response
 						name: itemName,
 						parent_id: parentId,
 						children: [],
@@ -275,7 +276,7 @@ export const treeOperations = {
 		}
 	},
 
-	async newBookmark(itemId: number, itemName: string, itemUrl: string, parentId: number | null) {
+	async newBookmark(itemName: string, itemUrl: string, parentId: number | null) {
 		try {
 			const response = await fetch(`${API_BASE}/create-bookmark`, {
 				method: 'POST',
@@ -283,7 +284,6 @@ export const treeOperations = {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					id: itemId, // TODO get from response
 					name: itemName,
 					url: itemUrl,
 					folder_id: parentId
@@ -291,11 +291,13 @@ export const treeOperations = {
 			});
 
 			if (response.ok) {
+				const data = await response.json();
+				const newId = data.id;
 				rootItemsStore.update((state) => {
 					if (!state.data) return state;
 
 					const newBookmark: Bookmark = {
-						id: itemId,
+						id: newId,
 						name: itemName,
 						url: itemUrl,
 						favicon: '',

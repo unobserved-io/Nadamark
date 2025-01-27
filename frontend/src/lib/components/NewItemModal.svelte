@@ -39,14 +39,12 @@
 	async function handleSave(event: Event) {
 		event.preventDefault();
 		if ((type == 'folder' || validateUrl(itemUrl)) && itemName.length > 0) {
-			if ($contextMenuStore.data) {
-				if (type == 'folder') {
-					treeOperations.newFolder($contextMenuStore.data.id, itemName, selectedFolder);
-					closeModal();
-				} else if (type == 'bookmark') {
-					treeOperations.newBookmark($contextMenuStore.data.id, itemName, itemUrl, selectedFolder);
-					closeModal();
-				}
+			if (type == 'folder') {
+				treeOperations.newFolder(itemName, selectedFolder);
+				closeModal();
+			} else if (type == 'bookmark') {
+				treeOperations.newBookmark(itemName, itemUrl, selectedFolder);
+				closeModal();
 			} else {
 				console.error('No data in contextMenuStore.data.');
 			}
@@ -54,7 +52,7 @@
 			if (itemName.length <= 0) {
 				errorMsg = 'Please give it a name.';
 			} else if (!validateUrl(itemUrl)) {
-				errorMsg = 'Please enter a valid URL.';
+				errorMsg = 'Please enter a valid URL (with https:// etc.)';
 			}
 		}
 	}

@@ -1,6 +1,7 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use axum::{
+    extract::State,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -9,17 +10,22 @@ use serde_json::{self, Value};
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 
 use crate::{
-    database,
+    database::{self, DbConnection, Pool},
     models::{Bookmark, Folder},
 };
 
-pub async fn import_bookmarks_html(bookmarks_html: String) -> Response {
-    match parse_bookmarks_html(&bookmarks_html) {
+pub async fn import_bookmarks_html(
+    State(pool): State<Arc<Pool>>,
+    bookmarks_html: String,
+) -> Response {
+    let mut connection = pool.get().expect("Failed to get connection from pool");
+
+    match parse_bookmarks_html(&mut connection, &bookmarks_html) {
         Ok((folders_to_import, bookmarks_to_import)) => {
-            if let Err(e) = database::insert_folders(folders_to_import) {
+            if let Err(e) = database::insert_folders(&mut connection, folders_to_import) {
                 eprintln!("Failed to import folders: {}", e);
             };
-            if let Err(e) = database::insert_bookmarks(bookmarks_to_import) {
+            if let Err(e) = database::insert_bookmarks(&mut connection, bookmarks_to_import) {
                 eprintln!("Failed to import bookmarks: {}", e);
             };
             StatusCode::OK.into_response()
@@ -31,14 +37,19 @@ pub async fn import_bookmarks_html(bookmarks_html: String) -> Response {
     }
 }
 
-pub async fn import_bookmarks_linkwarden(linkwarden_json: String) -> Response {
+pub async fn import_bookmarks_linkwarden(
+    State(pool): State<Arc<Pool>>,
+    linkwarden_json: String,
+) -> Response {
+    let mut connection = pool.get().expect("Failed to get connection from pool");
+
     match serde_json::from_str(&linkwarden_json) {
-        Ok(json_values) => match parse_linkwarden_json(&json_values) {
+        Ok(json_values) => match parse_linkwarden_json(&mut connection, &json_values) {
             Ok((folders_to_import, bookmarks_to_import)) => {
-                if let Err(e) = database::insert_folders(folders_to_import) {
+                if let Err(e) = database::insert_folders(&mut connection, folders_to_import) {
                     eprintln!("Failed to import folders: {}", e);
                 };
-                if let Err(e) = database::insert_bookmarks(bookmarks_to_import) {
+                if let Err(e) = database::insert_bookmarks(&mut connection, bookmarks_to_import) {
                     eprintln!("Failed to import bookmarks: {}", e);
                 };
                 StatusCode::OK.into_response()
@@ -55,14 +66,18 @@ pub async fn import_bookmarks_linkwarden(linkwarden_json: String) -> Response {
     }
 }
 
-fn parse_bookmarks_html(html: &str) -> Result<(Vec<Folder>, Vec<Bookmark>), String> {
+fn parse_bookmarks_html(
+    mut connection: &mut DbConnection,
+    html: &str,
+) -> Result<(Vec<Folder>, Vec<Bookmark>), String> {
     let dom = Html::parse_document(&html);
 
     let mut folders_to_import: Vec<Folder> = Vec::new();
     let mut bookmarks_to_import: Vec<Bookmark> = Vec::new();
 
-    let mut bookmark_id_counter = database::get_highest_bookmark_id().unwrap_or(0) + 1;
-    let mut folder_id_counter = database::get_highest_folder_id().unwrap_or(0) + 1;
+    let mut bookmark_id_counter =
+        database::get_highest_bookmark_id(&mut connection).unwrap_or(0) + 1;
+    let mut folder_id_counter = database::get_highest_folder_id(&mut connection).unwrap_or(0) + 1;
 
     let folder_selector = Selector::parse("DL > DT > H3")
         .map_err(|e| format!("Failed to create folder_selector: {}", e))?;
@@ -159,12 +174,16 @@ fn find_parent_folder<'a>(element: &ElementRef, folders: &'a [Folder]) -> Option
     None
 }
 
-fn parse_linkwarden_json(json_data: &Value) -> Result<(Vec<Folder>, Vec<Bookmark>), String> {
+fn parse_linkwarden_json(
+    mut connection: &mut DbConnection,
+    json_data: &Value,
+) -> Result<(Vec<Folder>, Vec<Bookmark>), String> {
     let mut folders_to_import: Vec<Folder> = Vec::new();
     let mut bookmarks_to_import: Vec<Bookmark> = Vec::new();
 
-    let mut bookmark_id_counter = database::get_highest_bookmark_id().unwrap_or(0) + 1;
-    let mut folder_id_counter = database::get_highest_folder_id().unwrap_or(0) + 1;
+    let mut bookmark_id_counter =
+        database::get_highest_bookmark_id(&mut connection).unwrap_or(0) + 1;
+    let mut folder_id_counter = database::get_highest_folder_id(&mut connection).unwrap_or(0) + 1;
 
     let mut folder_id_counterparts: HashMap<i32, i32> = HashMap::new();
 

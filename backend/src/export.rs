@@ -1,21 +1,38 @@
-use axum::response::{Html, IntoResponse};
+use std::sync::Arc;
 
-use crate::database::{self, get_all_bookmarks, get_all_folders};
+use axum::{
+    extract::State,
+    response::{Html, IntoResponse},
+};
 
-pub async fn export_bookmarks() -> impl IntoResponse {
-    if !get_all_folders().unwrap_or(vec![]).is_empty()
-        || !get_all_bookmarks().unwrap_or(vec![]).is_empty()
+use crate::database::{self, get_all_bookmarks, get_all_folders, DbConnection, Pool};
+
+pub async fn export_bookmarks(State(pool): State<Arc<Pool>>) -> impl IntoResponse {
+    let mut connection = pool.get().expect("Failed to get connection from pool");
+    if !get_all_folders(&mut connection)
+        .unwrap_or(vec![])
+        .is_empty()
+        || !get_all_bookmarks(&mut connection)
+            .unwrap_or(vec![])
+            .is_empty()
     {
-        let html = traverse_bookmarks(None, &mut String::new(), 0);
+        let html = traverse_bookmarks(&mut connection, None, &mut String::new(), 0);
         return Html(html).into_response();
     }
 
     Html("").into_response()
 }
 
-fn traverse_bookmarks(parent_folder_id: Option<i32>, html: &mut String, tabs: usize) -> String {
-    let child_folders = database::get_all_child_folders(&parent_folder_id).unwrap();
-    let child_bookmarks = database::get_all_child_bookmarks(&parent_folder_id).unwrap_or(vec![]);
+fn traverse_bookmarks(
+    mut connection: &mut DbConnection,
+    parent_folder_id: Option<i32>,
+    html: &mut String,
+    tabs: usize,
+) -> String {
+    let child_folders =
+        database::get_all_child_folders(&mut connection, &parent_folder_id).unwrap();
+    let child_bookmarks =
+        database::get_all_child_bookmarks(&mut connection, &parent_folder_id).unwrap_or(vec![]);
     let add_tags = !child_folders.is_empty() || !child_bookmarks.is_empty();
     let mut further_tabs = tabs;
 
@@ -46,7 +63,7 @@ fn traverse_bookmarks(parent_folder_id: Option<i32>, html: &mut String, tabs: us
             add_date,
             folder.name
         ));
-        traverse_bookmarks(Some(folder.id), html, further_tabs);
+        traverse_bookmarks(&mut connection, Some(folder.id), html, further_tabs);
     }
 
     for bookmark in child_bookmarks {
