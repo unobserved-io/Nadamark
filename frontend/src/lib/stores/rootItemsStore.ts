@@ -241,7 +241,7 @@ export const treeOperations = {
 					if (!state.data) return state;
 
 					const newFolder: FolderNode = {
-						id: newId, // TODO get from response
+						id: newId,
 						name: itemName,
 						parent_id: parentId,
 						children: [],
