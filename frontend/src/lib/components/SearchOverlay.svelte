@@ -143,7 +143,7 @@
 </script>
 
 {#if isOpen}
-	<div role="dialog" aria-modal="true" class="fixed inset-0 z-40" transition:fade>
+	<div role="dialog" aria-modal="true" class="fixed inset-0 z-40 text-black" transition:fade>
 		<button
 			type="button"
 			class="absolute inset-0 h-full w-full cursor-default bg-black/50"
@@ -164,14 +164,13 @@
 				/>
 
 				{#if results.length > 0}
-					<ul class="max-h-96 overflow-y-auto border-t">
+					<ul class="max-h-96 overflow-y-auto border-t" style="border-radius: inherit">
 						{#each results as result, i}
 							<li>
 								<a
 									href={result.url}
 									class="block w-full cursor-pointer p-4 text-left"
 									class:bg-gray-100={i === selectedIndex}
-									class:rounded-b-xl={i === results.length - 1}
 									onclick={preventDefault(() => selectItem())}
 									onfocus={() => ({})}
 									onmouseover={() => (selectedIndex = i)}

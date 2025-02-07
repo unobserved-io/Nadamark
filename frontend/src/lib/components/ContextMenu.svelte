@@ -130,6 +130,27 @@
 	}
 
 	.context-menu li:hover {
+		border: 0px;
 		background-color: #f5f5f5;
+	}
+
+	.context-menu li:first-child:hover {
+		border-top-right-radius: 5px;
+		border-top-left-radius: 5px;
+	}
+
+	.context-menu li:last-child:hover {
+		border-bottom-right-radius: 5px;
+		border-bottom-left-radius: 5px;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.context-menu {
+			background: #303030;
+		}
+
+		.context-menu li:hover {
+			background-color: #505050;
+		}
 	}
 </style>

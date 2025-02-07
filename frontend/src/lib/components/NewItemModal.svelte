@@ -267,4 +267,25 @@
 		border-radius: 4px;
 		margin-bottom: 1rem;
 	}
+
+	@media (prefers-color-scheme: dark) {
+		.modal-content {
+			background: #303030;
+			border: 1px solid gray;
+		}
+
+		input,
+		select {
+			color: black;
+		}
+
+		.save {
+			background: white;
+			color: black;
+		}
+
+		.save:hover {
+			background: rgba(255, 255, 255, 0.7);
+		}
+	}
 </style>

@@ -205,7 +205,7 @@
 		left: 0;
 		top: 0.7em;
 		bottom: -0.7em;
-		width: 1px;
+		width: 0px;
 		background: white;
 	}
 
@@ -247,5 +247,11 @@
 	:global(.drag-over) {
 		background-color: rgba(0, 0, 0, 0.1);
 		border-radius: 4px;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		a {
+			color: #76c4fa;
+		}
 	}
 </style>

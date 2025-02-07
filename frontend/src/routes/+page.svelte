@@ -187,7 +187,7 @@
 
 		{#if hamburgerMenuIsOpen}
 			<div class="dropdown-menu" transition:slide={{ duration: 200 }} role="menu">
-				<div class="dropdown-item with-submenu">
+				<div class="dropdown-item with-submenu dropdown-item-top">
 					<div class="item-content">
 						<Icon icon="material-symbols:upload" />
 						Import
@@ -196,7 +196,7 @@
 						</span>
 					</div>
 					<div class="submenu">
-						<label for="bookmarkHTMLUpload" class="dropdown-item">
+						<label for="bookmarkHTMLUpload" class="dropdown-item dropdown-item-top">
 							<Icon icon="material-symbols:upload" />
 							Import HTML
 						</label>
@@ -208,7 +208,7 @@
 							disabled={isLoading}
 							style="display:none"
 						/>
-						<label for="bookmarkLinkwardenUpload" class="dropdown-item">
+						<label for="bookmarkLinkwardenUpload" class="dropdown-item dropdown-item-bottom">
 							<Icon icon="material-symbols:upload" />
 							Import Linkwarden JSON
 						</label>
@@ -222,7 +222,7 @@
 						/>
 					</div>
 				</div>
-				<button class="dropdown-item" onclick={exportBookmarksAsHtml}>
+				<button class="dropdown-item dropdown-item-bottom" onclick={exportBookmarksAsHtml}>
 					<Icon icon="material-symbols:download" />
 					Export
 				</button>
@@ -411,10 +411,6 @@
 		display: block;
 	}
 
-	.dropdown-item:hover {
-		background-color: #f5f5f5;
-	}
-
 	.root-drop-zone {
 		display: none;
 		padding: 1rem;
@@ -442,5 +438,30 @@
 		right: 0;
 		height: fit-content;
 		width: fit-content;
+	}
+
+	.dropdown-item-top:hover {
+		border-top-right-radius: 5px;
+		border-top-left-radius: 5px;
+	}
+
+	.dropdown-item-bottom:hover {
+		border-bottom-right-radius: 5px;
+		border-bottom-left-radius: 5px;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.dropdown-menu,
+		.submenu {
+			background: #303030;
+		}
+
+		.dropdown-item {
+			color: var(--color-gray-300);
+		}
+
+		.dropdown-item:hover {
+			background-color: #505050;
+		}
 	}
 </style>
