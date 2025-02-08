@@ -203,4 +203,22 @@
 	.overflow-dropdown li {
 		margin: 0.25rem 0;
 	}
+
+	@media (prefers-color-scheme: dark) {
+		.favorites li a {
+			color: #76c4fa;
+		}
+
+		.favorites ul {
+			border-color: var(--color-gray-300);
+		}
+
+		.overflow-button:hover {
+			background-color: #505050;
+		}
+
+		.overflow-dropdown {
+			background: #303030;
+		}
+	}
 </style>
