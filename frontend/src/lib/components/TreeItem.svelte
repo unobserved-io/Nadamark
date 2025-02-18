@@ -253,5 +253,9 @@
 		a {
 			color: #76c4fa;
 		}
+		:global(.drag-over) {
+			background-color: rgba(255, 255, 255, 0.2);
+			border-radius: 4px;
+		}
 	}
 </style>
