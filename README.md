@@ -2,7 +2,11 @@
 
 Nadamark is a bookmark manager for minimalists. You can use the provided docker-compose.yml to self-host it on your own server/computer (instructions below).
 
-[![Nadamark Intro Video](https://unobserved.io/assets/screenshots/nadamark/nadamark.png)](https://www.youtube.com/watch?v=nfH1TrSqyVM)
+<p align="center">
+  <img src="https://unobserved.io/assets/screenshots/nadamark/nadamark.png" width="600">
+</p>
+
+Check out the intro video [here](https://www.youtube.com/watch?v=nfH1TrSqyVM).
 
 ## Disclaimer
 ⚠️ Nadamark is new and under active development. It is ready for production, but there may be breaking changes in future versions. I recommend regularly exporting your bookmarks to HTML as a backup.
